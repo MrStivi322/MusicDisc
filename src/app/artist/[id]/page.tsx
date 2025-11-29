@@ -5,7 +5,6 @@ import type { Artist, Song, Album } from "@/lib/database.types"
 import styles from "@/styles/pages/ArtistProfile.module.css"
 import DOMPurify from 'isomorphic-dompurify'
 import { useLanguage } from "@/contexts/LanguageContext"
-import { usePlayer } from "@/contexts/PlayerContext"
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { SkeletonProfile } from "@/components/SkeletonLoader"
@@ -73,7 +72,6 @@ function LazySpotifyEmbed({ spotifyId }: { spotifyId: string }) {
 export default function ArtistPage() {
     const { id } = useParams()
     const { t } = useLanguage()
-    const { playTrack, closePlayer, currentSpotifyId } = usePlayer()
     const [artist, setArtist] = useState<Artist | null>(null)
     const [songs, setSongs] = useState<Song[] | null>(null)
     const [albums, setAlbums] = useState<Album[] | null>(null)

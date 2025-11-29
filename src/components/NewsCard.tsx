@@ -3,16 +3,7 @@ import styles from "@/styles/components/NewsCard.module.css"
 import { useOnScreenCenter } from "@/hooks/useOnScreenCenter"
 
 const categoryColors = [
-    '#FF5733',
-    '#33FF57',
-    '#3357FF',
-    '#FF33F1',
-    '#33FFF1',
-    '#FFD333',
-    '#33D3FF',
-    '#FF3385',
-    '#33FFC8',
-    '#FF8533',
+    ''
 ]
 
 function getCategoryColor(category: string): string {
