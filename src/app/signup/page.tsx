@@ -1,0 +1,210 @@
+"use client"
+
+import { useState } from "react"
+import { supabase } from "@/lib/supabase"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import styles from "@/styles/pages/Auth.module.css"
+import { useLanguage } from "@/contexts/LanguageContext"
+
+export default function SignupPage() {
+    const { t } = useLanguage()
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    })
+    const [showPassword, setShowPassword] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState<Record<string, string>>({})
+    const router = useRouter()
+
+    const validateForm = async () => {
+        const newErrors: Record<string, string> = {}
+
+        if (!formData.username.trim()) {
+            newErrors.username = t('auth.error.username_required')
+        } else if (formData.username.length < 3) {
+            newErrors.username = t('auth.error.username_length')
+        } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+            newErrors.username = "Username can only contain letters, numbers, and underscores"
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = t('auth.error.email_required')
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = t('auth.error.email_invalid')
+        }
+
+        if (!formData.password) {
+            newErrors.password = "Password is required"
+        } else if (formData.password.length < 6) {
+            newErrors.password = t('auth.error.password_length')
+        } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+            newErrors.password = t('auth.error.password_symbol')
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = t('auth.error.password_match')
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+
+        const isValid = await validateForm()
+        if (!isValid) {
+            setLoading(false)
+            return
+        }
+
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        username: formData.username,
+                    }
+                }
+            })
+
+            if (error) {
+                if (error.message.includes('already registered') || error.status === 422) {
+                    router.push("/login?message=Check your email to confirm your account")
+                    return
+                }
+                throw error
+            }
+
+            router.push("/login?message=Check your email to confirm your account")
+        } catch (err: any) {
+            setErrors({ general: err.message })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className={styles.container}>
+            <div className={styles.card}>
+                <div className={styles.header}>
+                    <h2 className={styles.title}>{t('auth.signup.title')}</h2>
+                    <p className={styles.subtitle}>
+                        {t('auth.signup.subtitle')}{" "}
+                        <Link href="/login" className={styles.footer_link}>
+                            {t('auth.signup.cta')}
+                        </Link>
+                    </p>
+                </div>
+                <form className={styles.form} onSubmit={handleSignup}>
+                    {errors.general && (
+                        <div className={styles.error}>{errors.general}</div>
+                    )}
+
+                    <div className={styles.field}>
+                        <label htmlFor="username" className={styles.label}>
+                            {t('auth.form.username')}
+                        </label>
+                        <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            required
+                            value={formData.username}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                            className={styles.input}
+                            placeholder="johndoe"
+                        />
+                        {errors.username && (
+                            <span className={styles.field_error}>{errors.username}</span>
+                        )}
+                    </div>
+
+                    <div className={styles.field}>
+                        <label htmlFor="email-address" className={styles.label}>
+                            {t('auth.form.email')}
+                        </label>
+                        <input
+                            id="email-address"
+                            name="email"
+                            type="email"
+                            autoComplete="email"
+                            required
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className={styles.input}
+                            placeholder="you@example.com"
+                        />
+                        {errors.email && (
+                            <span className={styles.field_error}>{errors.email}</span>
+                        )}
+                    </div>
+
+                    <div className={styles.field}>
+                        <label htmlFor="password" className={styles.label}>
+                            {t('auth.form.password')}
+                        </label>
+                        <div className={styles.password_field}>
+                            <input
+                                id="password"
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                autoComplete="new-password"
+                                required
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                className={styles.input}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className={styles.password_toggle}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? <i className='bx bx-hide'></i> : <i className='bx bx-show'></i>}
+                            </button>
+                        </div>
+                        {errors.password && (
+                            <span className={styles.field_error}>{errors.password}</span>
+                        )}
+                    </div>
+
+                    <div className={styles.field}>
+                        <label htmlFor="confirm-password" className={styles.label}>
+                            {t('auth.form.confirm_password')}
+                        </label>
+                        <input
+                            id="confirm-password"
+                            name="confirmPassword"
+                            type="password"
+                            autoComplete="new-password"
+                            required
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            className={styles.input}
+                            placeholder="••••••••"
+                        />
+                        {errors.confirmPassword && (
+                            <span className={styles.field_error}>{errors.confirmPassword}</span>
+                        )}
+                    </div>
+
+                    <button
+                        type="submit"
+                        className={styles.submit_button}
+                        disabled={loading}
+                    >
+                        {loading ? t('auth.signup.creating') : t('auth.signup.button')}
+                    </button>
+                </form>
+            </div>
+        </div>
+    )
+}

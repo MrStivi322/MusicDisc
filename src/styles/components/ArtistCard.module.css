@@ -1,0 +1,300 @@
+.card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    background-color: var(--glass-background);
+    backdrop-filter: blur(var(--blur-md));
+    color: var(--color-card-foreground);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-slow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    aspect-ratio: 3/4;
+    isolation: isolate;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-2xl);
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--color-primary);
+}
+
+.card:active {
+    transform: translateY(-4px) scale(1.01);
+}
+
+.image_container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-muted);
+    overflow: hidden;
+}
+
+.image_container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.9) 0%,
+            rgba(0, 0, 0, 0.4) 50%,
+            transparent 100%);
+    opacity: 1;
+    transition: opacity var(--transition-slow);
+}
+
+.card:hover .image_container::after {
+    opacity: 0.5;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slower);
+}
+
+.card:hover .image {
+    transform: scale(1.15);
+}
+
+.content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem 1.5rem 1rem;
+    z-index: 1;
+    transform: translateY(0);
+    transition: transform var(--transition-base);
+}
+
+.card:hover .content {
+    transform: translateY(-8px);
+}
+
+.name_container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.artist_name {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+    white-space: nowrap;
+    margin: 0;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: all var(--transition-base);
+}
+
+.card:hover .artist_name,
+.card:hover .arrow_icon {
+    color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+.arrow_icon {
+    font-size: 2rem;
+    margin-top: auto;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all var(--transition-slow);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.card:hover .arrow_icon {
+    opacity: 1;
+    transform: translateX(0);
+    animation: bounceRight 1.2s infinite ease-in-out;
+}
+
+@keyframes bounceRight {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(6px);
+    }
+}
+
+.genre_tag {
+    font-size: var(--text-sm);
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--blur-sm));
+    color: white;
+    transition: all var(--transition-base);
+}
+
+.card:hover .genre_tag {
+    transform: translateY(-4px) scale(1.05);
+}
+
+.tags_container {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.group_tag {
+    font-size: var(--text-sm);
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--blur-sm));
+    color: white;
+    background-color: #0009;
+    transition: all var(--transition-base);
+}
+
+.card:hover .group_tag {
+    transform: translateY(-4px) scale(1.05);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 70%);
+    transform: translateX(-100%);
+    transition: transform var(--transition-slower);
+    z-index: 1;
+}
+
+.card:hover::before {
+    transform: translateX(100%);
+}
+
+
+@media (max-width: 768px) {
+    .artist_name {
+        font-size: var(--text-xl);
+    }
+
+    .arrow_icon {
+        font-size: 1.5rem;
+    }
+
+    .genre_tag {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.75rem;
+    }
+
+    .group_tag {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.75rem;
+    }
+
+    .card:hover {
+        transform: translateY(-4px) scale(1.01);
+    }
+}
+
+
+@media (max-width: 480px) {
+    .artist_name {
+        font-size: var(--text-lg);
+    }
+
+    .arrow_icon {
+        font-size: 1.25rem;
+    }
+
+    .content {
+        padding: 1.5rem 1.25rem 0.875rem;
+    }
+}
+
+.fire_effect {
+    position: relative;
+    border-color: #ff4500;
+    box-shadow: 0 0 10px #ff4500, 0 0 20px #ff8c00;
+    animation: firePulse 2s infinite alternate;
+    z-index: 0;
+}
+
+.fire_effect::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 20px rgba(255, 69, 0, 0.5);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.wide {
+    aspect-ratio: unset !important;
+    height: 100%;
+    min-height: 20rem;
+}
+
+@media (max-width: 600px) {
+    .wide {
+        aspect-ratio: 3/4 !important;
+    }
+}
+
+.fire_effect::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00);
+    z-index: -1;
+    opacity: 0.7;
+    filter: blur(10px);
+    animation: fireGlow 1.5s infinite alternate;
+}
+
+@keyframes firePulse {
+    0% {
+        box-shadow: 0 0 10px #ff4500, 0 0 20px #ff8c00;
+        border-color: #ff4500;
+    }
+
+    100% {
+        box-shadow: 0 0 15px #ff4500, 0 0 30px #ff8c00, 0 0 45px #ffd700;
+        border-color: #ffd700;
+    }
+}
+
+@keyframes fireGlow {
+    0% {
+        opacity: 0.5;
+        filter: blur(8px);
+    }
+
+    100% {
+        opacity: 0.8;
+        filter: blur(12px);
+    }
+}

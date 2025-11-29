@@ -1,0 +1,100 @@
+.cropper_container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.cropper_wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    height: 400px;
+    background-color: #333;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-xl);
+}
+
+.controls {
+    width: 100%;
+    max-width: 500px;
+    background: var(--glass-background);
+    backdrop-filter: blur(var(--blur-md));
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+}
+
+.slider_container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.slider_label {
+    color: white;
+    font-weight: 600;
+    min-width: 3rem;
+}
+
+.slider {
+    flex: 1;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+.buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn_cancel,
+.btn_save {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: none;
+    font-size: 0.9rem;
+}
+
+.btn_cancel {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn_cancel:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn_save {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+}
+
+.btn_save:hover {
+    background-color: hsl(24.6, 95%, 48%);
+}
+
+@media (max-width: 480px) {
+    .cropper_container {
+        padding: 1rem;
+    }
+
+    .cropper_wrapper {
+        height: 300px;
+    }
+}

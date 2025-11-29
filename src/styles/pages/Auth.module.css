@@ -1,0 +1,182 @@
+.container {
+    display: flex;
+    min-height: calc(100vh - 5rem);
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    width: 100%;
+    max-width: 30rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    background-color: var(--glass-background);
+    backdrop-filter: blur(var(--blur-md));
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-muted-foreground);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+.input {
+    height: 2.5rem;
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: none;
+    background-color: var(--color-secondary);
+    padding: 0.5rem 1rem;
+    transition: all var(--transition-base);
+}
+
+.input::placeholder {
+    color: var(--color-muted-foreground);
+}
+
+.input:focus {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}
+
+.password_field {
+    position: relative;
+}
+
+.password_field .input {
+    padding-right: 2.5rem;
+}
+
+.password_toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-muted-foreground);
+    padding: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-base);
+}
+
+.password_toggle:hover {
+    color: var(--color-foreground);
+}
+
+.button,
+.submit_button {
+    height: 2.5rem;
+    width: 100%;
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    border: none;
+    cursor: pointer;
+}
+
+.button:hover,
+.submit_button:hover {
+    background-color: hsl(24.6, 95%, 48%);
+}
+
+.button:disabled,
+.submit_button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.error {
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-md);
+    background-color: hsla(0, 84%, 60%, 0.1);
+    border: 1px solid var(--color-destructive);
+    color: var(--color-destructive);
+}
+
+.field_error {
+    font-size: 0.9rem;
+    color: var(--color-destructive);
+    margin-top: -0.25rem;
+}
+
+.footer_link {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.footer_link:hover {
+    text-decoration: underline;
+}
+
+
+
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.75rem;
+    }
+
+    .card {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .title {
+        font-size: 1.375rem;
+    }
+
+    .input,
+    .button {
+        font-size: 0.875rem;
+    }
+}

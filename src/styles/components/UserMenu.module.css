@@ -1,0 +1,107 @@
+.dropdown_container {
+    position: relative;
+}
+
+.avatar_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: var(--radius-full);
+    background-color: var(--color-primary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.avatar_button:hover {
+    border: 2px solid var(--color-primary);
+}
+
+.avatar_image {
+    width: 2.5rem;
+    height: 2.5rem;
+    object-fit: cover;
+}
+
+.dropdown_menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    min-width: 12rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    box-shadow: var(--shadow-lg);
+    padding: 0.5rem;
+    animation: dropdown-in 0.15s ease-in-out;
+}
+
+@keyframes dropdown-in {
+    from {
+        opacity: 0;
+        transform: translateY(-1rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown_item {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    color: var(--color-foreground);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+}
+
+.dropdown_item:hover {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.dropdown_icon {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown_divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 0.25rem 0;
+}
+
+
+
+
+@media (max-width: 768px) {
+    .dropdown_menu {
+        min-width: 11rem;
+        right: -0.5rem;
+    }
+
+    .dropdown_item {
+        font-size: 0.875rem;
+        padding: 0.7rem 0.875rem;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .dropdown_menu {
+        min-width: 10rem;
+    }
+}
