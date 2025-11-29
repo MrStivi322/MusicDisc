@@ -14,6 +14,7 @@ export function Navbar() {
     const { user } = useAuth()
     const { t } = useLanguage()
     const [scrolled, setScrolled] = useState(false)
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     useEffect(() => {
         const handleScroll = () => {
@@ -24,6 +25,21 @@ export function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
+    // Close menu when route changes
+    useEffect(() => {
+        setIsMenuOpen(false)
+    }, [pathname])
+
+    // Prevent scrolling when menu is open
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'unset'
+        }
+        return () => { document.body.style.overflow = 'unset' }
+    }, [isMenuOpen])
+
     const navLinks = [
         { href: "/", label: t('nav.home') },
         { href: "/artists", label: t('nav.artists') },
@@ -33,13 +49,21 @@ export function Navbar() {
     return (
         <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
             <div className={styles.container}>
+                <button
+                    className={styles.mobile_menu_btn}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    aria-label="Toggle menu"
+                >
+                    <i className={`bx ${isMenuOpen ? 'bx-x' : 'bx-menu'}`}></i>
+                </button>
+
                 <Link href="/" className={styles.logo}>
                     <div className={styles.logo_image}>
                         <img
-                            src="/logo.webp"
+                            src="/icono.png"
                             alt="MusicDisc Logo"
-                            width={60}
-                            height={60}
+                            width={40}
+                            height={40}
                         />
                     </div>
                     <span className={styles.logo_text}>MusicDisc</span>
@@ -72,6 +96,22 @@ export function Navbar() {
                         </Link>
                     )}
                 </div>
+            </div>
+
+            {/* Mobile Menu */}
+            <div className={`${styles.mobile_menu} ${isMenuOpen ? styles.open : ''}`}>
+                <nav className={styles.mobile_nav}>
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={styles.mobile_nav_link}
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
             </div>
         </header>
     )

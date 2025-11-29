@@ -17,7 +17,8 @@
     text-decoration: none;
 }
 
-.card:hover {
+.card:hover,
+.card.centered {
     box-shadow: var(--shadow-2xl);
     transform: translateY(-8px) scale(1.02);
     border-color: var(--color-primary);
@@ -48,7 +49,8 @@
     transition: opacity var(--transition-slow);
 }
 
-.card:hover .image_container::after {
+.card:hover .image_container::after,
+.card.centered .image_container::after {
     opacity: 0.5;
 }
 
@@ -59,7 +61,8 @@
     transition: transform var(--transition-slower);
 }
 
-.card:hover .image {
+.card:hover .image,
+.card.centered .image {
     transform: scale(1.15);
 }
 
@@ -74,7 +77,8 @@
     transition: transform var(--transition-base);
 }
 
-.card:hover .content {
+.card:hover .content,
+.card.centered .content {
     transform: translateY(-8px);
 }
 
@@ -99,7 +103,9 @@
 }
 
 .card:hover .artist_name,
-.card:hover .arrow_icon {
+.card.centered .artist_name,
+.card:hover .arrow_icon,
+.card.centered .arrow_icon {
     color: var(--color-primary);
     transform: translateX(4px);
 }
@@ -113,7 +119,8 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-.card:hover .arrow_icon {
+.card:hover .arrow_icon,
+.card.centered .arrow_icon {
     opacity: 1;
     transform: translateX(0);
     animation: bounceRight 1.2s infinite ease-in-out;
@@ -142,7 +149,8 @@
     transition: all var(--transition-base);
 }
 
-.card:hover .genre_tag {
+.card:hover .genre_tag,
+.card.centered .genre_tag {
     transform: translateY(-4px) scale(1.05);
 }
 
@@ -169,7 +177,8 @@
     transition: all var(--transition-base);
 }
 
-.card:hover .group_tag {
+.card:hover .group_tag,
+.card.centered .group_tag {
     transform: translateY(-4px) scale(1.05);
 }
 
@@ -189,7 +198,8 @@
     z-index: 1;
 }
 
-.card:hover::before {
+.card:hover::before,
+.card.centered::before {
     transform: translateX(100%);
 }
 
@@ -213,8 +223,25 @@
         padding: 0.3rem 0.75rem;
     }
 
-    .card:hover {
-        transform: translateY(-4px) scale(1.01);
+    /* Remove hover effects on mobile unless centered */
+    .card:hover:not(.centered) {
+        transform: none;
+        box-shadow: var(--shadow-md);
+        border-color: var(--glass-border);
+    }
+
+    .card:hover:not(.centered) .image {
+        transform: none;
+    }
+
+    .card:hover:not(.centered) .content {
+        transform: none;
+    }
+
+    .card:hover:not(.centered) .arrow_icon {
+        opacity: 0;
+        transform: translateX(-20px);
+        animation: none;
     }
 }
 
@@ -257,7 +284,7 @@
     min-height: 20rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 555px) {
     .wide {
         aspect-ratio: 3/4 !important;
     }

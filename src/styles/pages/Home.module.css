@@ -163,9 +163,7 @@
     }
 
     .cta_container {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 1rem;
     }
 
@@ -176,19 +174,12 @@
     .btn_primary,
     .btn_secondary,
     .btn_tertiary {
-        width: 100%;
         justify-content: center;
     }
 
     .stats_container {
-        flex-direction: column;
         gap: 1.5rem;
         padding: 1.5rem;
-    }
-
-    .stat_divider {
-        width: 40px;
-        height: 1px;
     }
 }
 

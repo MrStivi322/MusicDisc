@@ -14,7 +14,8 @@
     position: relative;
 }
 
-.card:hover {
+.card:hover,
+.card.centered {
     box-shadow: var(--shadow-2xl);
     transform: translateY(-8px) scale(1.02);
     border-color: var(--color-primary);
@@ -42,7 +43,8 @@
     transition: opacity var(--transition-base);
 }
 
-.card:hover .image_container::after {
+.card:hover .image_container::after,
+.card.centered .image_container::after {
     opacity: 1;
 }
 
@@ -53,7 +55,8 @@
     transition: transform var(--transition-slower);
 }
 
-.card:hover .image {
+.card:hover .image,
+.card.centered .image {
     transform: scale(1.1);
 }
 
@@ -84,7 +87,8 @@
     transition: all var(--transition-base);
 }
 
-.card:hover .category_badge {
+.card:hover .category_badge,
+.card.centered .category_badge {
     transform: translateY(-4px) scale(1.05);
 }
 
@@ -108,7 +112,8 @@
     margin: 0;
 }
 
-.card:hover .title {
+.card:hover .title,
+.card.centered .title {
     color: var(--color-primary);
 }
 
@@ -186,7 +191,8 @@
     pointer-events: none;
 }
 
-.card:hover::before {
+.card:hover::before,
+.card.centered::before {
     left: 100%;
 }
 
@@ -207,8 +213,19 @@
         padding: 0.3rem 0.75rem;
     }
 
-    .card:hover {
-        transform: translateY(-4px) scale(1.01);
+    /* Remove hover effects on mobile unless centered */
+    .card:hover:not(.centered) {
+        transform: none;
+        box-shadow: var(--shadow-md);
+        border-color: var(--glass-border);
+    }
+
+    .card:hover:not(.centered) .image {
+        transform: none;
+    }
+
+    .card:hover:not(.centered) .title {
+        color: var(--color-card-foreground);
     }
 
     .footer {

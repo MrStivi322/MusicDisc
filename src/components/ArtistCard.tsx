@@ -1,5 +1,6 @@
 import Link from "next/link"
 import styles from "@/styles/components/ArtistCard.module.css"
+import { useOnScreenCenter } from "@/hooks/useOnScreenCenter"
 
 const genreColors = [
     '#ff6b6b',
@@ -35,9 +36,13 @@ interface ArtistCardProps {
 
 export function ArtistCard({ id, name, genre, image, followers, isWide, showFireEffect }: ArtistCardProps) {
     const genreColor = getGenreColor(genre)
+    const [ref, isCentered] = useOnScreenCenter({ threshold: 0.2, delay: 600 })
 
     return (
-        <div className={`${styles.card} ${isWide ? styles.wide : ''} ${showFireEffect ? styles.fire_effect : ''}`}>
+        <div
+            ref={ref}
+            className={`${styles.card} ${isWide ? styles.wide : ''} ${showFireEffect ? styles.fire_effect : ''} ${isCentered ? styles.centered : ''}`}
+        >
             <div className={styles.image_container}>
                 {image ? (
                     <img src={image} alt={name} className={styles.image} loading="lazy" />

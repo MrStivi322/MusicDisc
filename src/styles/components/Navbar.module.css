@@ -36,12 +36,9 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-left: 4rem;
 }
 
 .logo_image {
-    position: absolute;
-    left: -4rem;
     width: max-content;
     height: max-content;
     display: flex;
@@ -162,8 +159,13 @@
     font-size: 1.25rem;
 }
 
+.mobile_menu_btn {
+    display: none;
+}
 
-
+.mobile_nav {
+    display: none;
+}
 
 @media (max-width: 768px) {
     .container {
@@ -174,13 +176,64 @@
         display: none;
     }
 
+    .mobile_menu_btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: var(--color-foreground);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 100;
+    }
+
+    .mobile_menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: var(--color-background);
+        padding: 5rem 2rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 90;
+    }
+
+    .mobile_menu.open {
+        transform: translateX(0);
+    }
+
+    .mobile_nav {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .mobile_nav_link {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-foreground);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .mobile_nav_link:active {
+        color: var(--color-primary);
+    }
+
     .logo {
-        margin-left: 3rem;
+        margin-left: 0;
         font-size: var(--text-lg);
     }
 
     .logo_image {
-        left: -3rem;
         width: 36px;
         height: 36px;
     }
@@ -194,7 +247,6 @@
     }
 }
 
-
 @media (max-width: 480px) {
     .container {
         gap: 1rem;
@@ -202,12 +254,10 @@
     }
 
     .logo {
-        margin-left: 2.5rem;
         font-size: var(--text-base);
     }
 
     .logo_image {
-        left: -2.5rem;
         width: 32px;
         height: 32px;
     }

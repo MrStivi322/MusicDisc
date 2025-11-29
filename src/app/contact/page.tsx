@@ -56,7 +56,7 @@ export default function ContactPage() {
                         </div>
 
                         <div className={styles.links_grid}>
-                            <a href="" target="_blank" rel="noopener noreferrer" className={`${styles.link_card} ${styles.twitter}`}>
+                            <a href="https://x.com/xzyapbdj" target="_blank" rel="noopener noreferrer" className={`${styles.link_card} ${styles.twitter}`}>
                                 <i className='bxl bx-twitter-x'></i>
                                 <span>Twitter</span>
                             </a>
@@ -68,7 +68,7 @@ export default function ContactPage() {
                                     <path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"></path>
                                     <path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0 C43.076,8,45,9.924,45,12.298z"></path>
                                 </svg>
-                                <span>contact@musicdisc.com</span>
+                                <span>flowmusichub@gmail.com</span>
                             </a>
                         </div>
                     </div>

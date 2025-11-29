@@ -17,7 +17,6 @@
     display: flex;
     color: var(--color-muted-foreground);
     flex-direction: column;
-    position: absolute;
 }
 
 .brand_title {

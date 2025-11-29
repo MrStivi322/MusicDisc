@@ -24,6 +24,10 @@ const comfortaa = Comfortaa({
 export const metadata: Metadata = {
   title: "Music Discovery",
   description: "Discover new artists and music news",
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  },
 };
 
 export default function RootLayout({

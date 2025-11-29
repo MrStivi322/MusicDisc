@@ -1,5 +1,6 @@
 import Link from "next/link"
 import styles from "@/styles/components/NewsCard.module.css"
+import { useOnScreenCenter } from "@/hooks/useOnScreenCenter"
 
 const categoryColors = [
     '#FF5733',
@@ -37,8 +38,13 @@ interface NewsCardProps {
 
 export function NewsCard({ id, title, excerpt, image, date, category, author, commentsCount = 0, viewsCount = 0 }: NewsCardProps) {
     const categoryColor = getCategoryColor(category)
+    const [ref, isCentered] = useOnScreenCenter({ threshold: 0.2, delay: 600 })
+
     return (
-        <div className={styles.card}>
+        <div
+            ref={ref}
+            className={`${styles.card} ${isCentered ? styles.centered : ''}`}
+        >
             <div className={styles.image_container}>
                 {image ? (
                     <img src={image} alt={title} className={styles.image} loading="lazy" />

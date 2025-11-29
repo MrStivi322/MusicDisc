@@ -103,6 +103,18 @@ export default function NewsPage() {
                             </button>
                         ))}
                     </div>
+
+                    <select
+                        value={activeCategory}
+                        onChange={(e) => setActiveCategory(e.target.value)}
+                        className={styles.mobile_filter_select}
+                    >
+                        {categories.map((category) => (
+                            <option key={category} value={category}>
+                                {category === "All" ? "All Categories" : (t(`category.${category}`) === `category.${category}` ? category : t(`category.${category}`))}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 {loading ? (
