@@ -22,6 +22,11 @@
 
 .section {
     margin-bottom: 2.5rem;
+    border: 1px solid var(--glass-border);
+    background-color: var(--glass-background);
+    backdrop-filter: var(--blur-md);
+    padding: 1rem;
+    border-radius: 1rem;
 }
 
 .section h2 {

@@ -23,6 +23,7 @@ const comfortaa = Comfortaa({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: {
     template: '%s | Music Discovery',
     default: 'Music Discovery',
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     description: 'Discover new artists, albums, and music news.',
     images: [
       {
-        url: '/og-image.jpg', // We should ensure this exists or use a placeholder
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Music Discovery Platform',
