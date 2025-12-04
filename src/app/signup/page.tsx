@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import styles from "@/styles/pages/Auth.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { validate, signupSchema } from "@/lib/validation"
 
 export default function SignupPage() {
     const { t } = useLanguage()
@@ -20,37 +21,10 @@ export default function SignupPage() {
     const [errors, setErrors] = useState<Record<string, string>>({})
     const router = useRouter()
 
-    const validateForm = async () => {
-        const newErrors: Record<string, string> = {}
-
-        if (!formData.username.trim()) {
-            newErrors.username = t('auth.error.username_required')
-        } else if (formData.username.length < 3) {
-            newErrors.username = t('auth.error.username_length')
-        } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-            newErrors.username = "Username can only contain letters, numbers, and underscores"
-        }
-
-        if (!formData.email.trim()) {
-            newErrors.email = t('auth.error.email_required')
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = t('auth.error.email_invalid')
-        }
-
-        if (!formData.password) {
-            newErrors.password = "Password is required"
-        } else if (formData.password.length < 6) {
-            newErrors.password = t('auth.error.password_length')
-        } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
-            newErrors.password = t('auth.error.password_symbol')
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = t('auth.error.password_match')
-        }
-
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
+    const validateForm = () => {
+        const result = validate(signupSchema, formData)
+        setErrors(result.errors)
+        return result.success
     }
 
     const handleSignup = async (e: React.FormEvent) => {
@@ -83,8 +57,9 @@ export default function SignupPage() {
             }
 
             router.push("/login?message=Check your email to confirm your account")
-        } catch (err: any) {
-            setErrors({ general: err.message })
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'An error occurred'
+            setErrors({ general: message })
         } finally {
             setLoading(false)
         }

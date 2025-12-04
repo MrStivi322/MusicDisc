@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import Cropper from 'react-easy-crop'
 import { Point, Area } from 'react-easy-crop'
 import styles from '@/styles/components/ImageCropper.module.css'
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface ImageCropperProps {
     imageSrc: string
@@ -12,9 +13,56 @@ interface ImageCropperProps {
 }
 
 export function ImageCropper({ imageSrc, onCropComplete, onCancel }: ImageCropperProps) {
+    const { t } = useLanguage()
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 })
     const [zoom, setZoom] = useState(1)
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onCancel()
+                return
+            }
+
+            if (e.key === 'Tab') {
+                const focusableElements = containerRef.current?.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                )
+
+                if (!focusableElements || focusableElements.length === 0) return
+
+                const firstElement = focusableElements[0] as HTMLElement
+                const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+                if (e.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault()
+                        lastElement.focus()
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault()
+                        firstElement.focus()
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown)
+
+        // Focus first interactive element on mount
+        const timer = setTimeout(() => {
+            const firstInput = containerRef.current?.querySelector('input')
+            if (firstInput) firstInput.focus()
+        }, 100)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+            clearTimeout(timer)
+        }
+    }, [onCancel])
 
     const onCropChange = (crop: Point) => {
         setCrop(crop)
@@ -87,7 +135,14 @@ export function ImageCropper({ imageSrc, onCropComplete, onCancel }: ImageCroppe
     }
 
     return (
-        <div className={styles.cropper_container}>
+        <div
+            className={styles.cropper_container}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cropper-title"
+            ref={containerRef}
+        >
+            <h2 id="cropper-title" className="sr-only">{t('settings.avatar.change')}</h2>
             <div className={styles.cropper_wrapper}>
                 <Cropper
                     image={imageSrc}
@@ -101,24 +156,24 @@ export function ImageCropper({ imageSrc, onCropComplete, onCancel }: ImageCroppe
             </div>
             <div className={styles.controls}>
                 <div className={styles.slider_container}>
-                    <span className={styles.slider_label}>Zoom</span>
+                    <label htmlFor="zoom-slider" className={styles.slider_label}>Zoom</label>
                     <input
+                        id="zoom-slider"
                         type="range"
                         value={zoom}
                         min={1}
                         max={3}
                         step={0.1}
-                        aria-labelledby="Zoom"
                         onChange={(e) => setZoom(Number(e.target.value))}
                         className={styles.slider}
                     />
                 </div>
                 <div className={styles.buttons}>
                     <button onClick={onCancel} className={styles.btn_cancel}>
-                        Cancel
+                        {t('settings.cancel')}
                     </button>
                     <button onClick={handleSave} className={styles.btn_save}>
-                        Crop & Save
+                        {t('settings.form.save')}
                     </button>
                 </div>
             </div>

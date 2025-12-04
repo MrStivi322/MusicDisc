@@ -72,10 +72,18 @@
     font-weight: 900;
 }
 
-.category_badge {
+.categories_container {
     position: absolute;
     top: 1rem;
     right: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    max-width: 80%;
+}
+
+.category_badge {
     font-size: var(--text-sm);
     padding: 0.4rem 1rem;
     border-radius: var(--radius-full);
@@ -85,6 +93,7 @@
     color: white;
     background-color: #0009;
     transition: all var(--transition-base);
+    white-space: nowrap;
 }
 
 .card:hover .category_badge,

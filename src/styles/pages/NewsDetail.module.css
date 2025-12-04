@@ -1,14 +1,96 @@
 .main {
     position: relative;
-    padding: 3rem 2rem 5rem;
+    padding: var(--spacing-12) var(--spacing-8) var(--spacing-20);
 }
 
 .header_grid {
     display: grid;
     grid-template-columns: 4fr 2fr;
-    gap: 2.5rem;
+    gap: var(--spacing-10);
     align-items: start;
-    margin-bottom: 2.5rem;
+    margin-bottom: var(--spacing-10);
+}
+
+/* Navigation & Breadcrumbs */
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--color-muted-foreground);
+}
+
+.breadcrumb_link {
+    color: var(--color-muted-foreground);
+    text-decoration: none;
+    transition: color var(--transition-base);
+}
+
+.breadcrumb_link:hover {
+    color: var(--color-primary);
+}
+
+.breadcrumb_separator {
+    color: var(--color-border);
+}
+
+.breadcrumb_current {
+    color: var(--color-foreground);
+    font-weight: 500;
+}
+
+.navigation_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.back_button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--glass-background);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    color: var(--color-foreground);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    backdrop-filter: blur(var(--blur-sm));
+}
+
+.back_button:hover {
+    background: var(--color-secondary);
+    border-color: var(--color-primary);
+    transform: translateX(-3px);
+}
+
+.filter_context {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    background: var(--glass-background);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--glass-border);
+}
+
+.filter_context_label {
+    color: var(--color-muted-foreground);
+}
+
+.filter_tag {
+    color: var(--color-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 @media (max-width: 1024px) {
@@ -85,7 +167,7 @@
 
 .article_content {
     font-size: 1.2rem;
-    line-height: 1.6;
+    line-height: 1.8;
     color: var(--color-foreground);
 }
 
@@ -323,7 +405,7 @@
     }
 
     .article_content {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .textarea {

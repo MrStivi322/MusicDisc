@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import styles from "@/styles/pages/Auth.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { validate, loginSchema } from "@/lib/validation"
 
 function LoginForm() {
     const { t } = useLanguage()
@@ -23,6 +24,15 @@ function LoginForm() {
         setLoading(true)
         setError(null)
 
+        const result = validate(loginSchema, { email, password })
+
+        if (!result.success) {
+            const firstError = Object.values(result.errors)[0]
+            setError(firstError || 'Invalid form data')
+            setLoading(false)
+            return
+        }
+
         try {
             const { error } = await supabase.auth.signInWithPassword({
                 email,
@@ -33,8 +43,9 @@ function LoginForm() {
 
             router.push("/")
             router.refresh()
-        } catch (err: any) {
-            setError(err.message)
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'An error occurred'
+            setError(message)
         } finally {
             setLoading(false)
         }

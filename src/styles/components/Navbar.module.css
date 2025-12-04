@@ -185,7 +185,9 @@
         color: var(--color-foreground);
         font-size: 1.5rem;
         cursor: pointer;
-        padding: 0.5rem;
+        padding: 0.75rem;
+        min-width: 44px;
+        min-height: 44px;
         z-index: 100;
     }
 
@@ -222,10 +224,33 @@
         color: var(--color-foreground);
         text-decoration: none;
         transition: color 0.2s;
+        position: relative;
+        padding: 0.75rem 1.5rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 
-    .mobile_nav_link:active {
+    .mobile_nav_link:active,
+    .mobile_nav_link:hover {
         color: var(--color-primary);
+    }
+
+    .mobile_nav_link_active {
+        color: var(--color-primary);
+        font-weight: 700;
+    }
+
+    .mobile_nav_link_active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 3px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-full);
     }
 
     .logo {
@@ -244,6 +269,13 @@
 
     .btn_login span {
         display: none;
+    }
+
+    .btn_login {
+        padding: 0.75rem;
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
     }
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import styles from "@/styles/components/ArtistCard.module.css"
 import { useOnScreenCenter } from "@/hooks/useOnScreenCenter"
 
@@ -32,9 +33,10 @@ interface ArtistCardProps {
     followers?: string | number
     isWide?: boolean
     showFireEffect?: boolean
+    onClick?: () => void
 }
 
-export function ArtistCard({ id, name, genre, image, followers, isWide, showFireEffect }: ArtistCardProps) {
+export function ArtistCard({ id, name, genre, image, followers, isWide, showFireEffect, onClick }: ArtistCardProps) {
     const genreColor = getGenreColor(genre)
     const [ref, isCentered] = useOnScreenCenter({ threshold: 0.2, delay: 600 })
 
@@ -45,7 +47,14 @@ export function ArtistCard({ id, name, genre, image, followers, isWide, showFire
         >
             <div className={styles.image_container}>
                 {image ? (
-                    <img src={image} alt={name} className={styles.image} loading="lazy" />
+                    <Image
+                        src={image}
+                        alt={`${name} - ${genre} artist profile picture`}
+                        className={styles.image}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                    />
                 ) : (
                     <div className={styles.placeholder}>
                         <span className={styles.placeholder_letter}>{name.charAt(0)}</span>
@@ -69,7 +78,7 @@ export function ArtistCard({ id, name, genre, image, followers, isWide, showFire
             </div>
 
             <div className={styles.content}>
-                <Link href={`/artist/${id}`} className={styles.artist_link}>
+                <Link href={`/artist/${id}`} className={styles.artist_link} onClick={onClick}>
                     <div className={styles.name_container}>
                         <h3 className={styles.artist_name}>
                             {name}

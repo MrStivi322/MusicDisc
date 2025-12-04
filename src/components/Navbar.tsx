@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserMenu } from "@/components/UserMenu"
 import { usePathname } from "next/navigation"
@@ -34,6 +35,38 @@ export function Navbar() {
     useEffect(() => {
         if (isMenuOpen) {
             document.body.style.overflow = 'hidden'
+
+            // Focus trap
+            const mobileMenu = document.querySelector(`.${styles.mobile_menu}`) as HTMLElement
+            if (mobileMenu) {
+                const focusableElements = mobileMenu.querySelectorAll('a[href], button, textarea, input, [tabindex]:not([tabindex="-1"])')
+                const firstElement = focusableElements[0] as HTMLElement
+                const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+                const handleTab = (e: KeyboardEvent) => {
+                    if (e.key === 'Tab') {
+                        if (e.shiftKey) {
+                            if (document.activeElement === firstElement) {
+                                e.preventDefault()
+                                lastElement.focus()
+                            }
+                        } else {
+                            if (document.activeElement === lastElement) {
+                                e.preventDefault()
+                                firstElement.focus()
+                            }
+                        }
+                    }
+                }
+
+                mobileMenu.addEventListener('keydown', handleTab as any)
+                firstElement?.focus()
+
+                return () => {
+                    document.body.style.overflow = 'unset'
+                    mobileMenu.removeEventListener('keydown', handleTab as any)
+                }
+            }
         } else {
             document.body.style.overflow = 'unset'
         }
@@ -59,22 +92,24 @@ export function Navbar() {
 
                 <Link href="/" className={styles.logo}>
                     <div className={styles.logo_image}>
-                        <img
+                        <Image
                             src="/icono.png"
                             alt="MusicDisc Logo"
                             width={40}
                             height={40}
+                            priority
                         />
                     </div>
                     <span className={styles.logo_text}>MusicDisc</span>
                 </Link>
 
-                <nav className={styles.nav}>
+                <nav className={styles.nav} role="navigation" aria-label="Main navigation">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
                             className={`${styles.nav_link} ${pathname === link.href ? styles.nav_link_active : ''}`}
+                            aria-current={pathname === link.href ? 'page' : undefined}
                         >
                             {link.label}
                             {pathname === link.href && <span className={styles.active_indicator}></span>}
@@ -100,13 +135,14 @@ export function Navbar() {
 
             {/* Mobile Menu */}
             <div className={`${styles.mobile_menu} ${isMenuOpen ? styles.open : ''}`}>
-                <nav className={styles.mobile_nav}>
+                <nav className={styles.mobile_nav} role="navigation" aria-label="Mobile navigation">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={styles.mobile_nav_link}
+                            className={`${styles.mobile_nav_link} ${pathname === link.href ? styles.mobile_nav_link_active : ''}`}
                             onClick={() => setIsMenuOpen(false)}
+                            aria-current={pathname === link.href ? 'page' : undefined}
                         >
                             {link.label}
                         </Link>

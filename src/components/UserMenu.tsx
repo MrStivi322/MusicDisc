@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import styles from "@/styles/components/UserMenu.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
 
@@ -74,7 +75,14 @@ export function UserMenu({ userEmail }: UserMenuProps) {
                 aria-label="User menu"
             >
                 {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className={styles.avatar_image} loading="lazy" />
+                    <Image
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className={styles.avatar_image}
+                        width={40}
+                        height={40}
+                        style={{ objectFit: 'cover' }}
+                    />
                 ) : (
                     getInitial()
                 )}

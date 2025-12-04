@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import type { News, UpcomingRelease } from "@/lib/database.types"
@@ -53,7 +54,13 @@ export function Sidebar() {
                                 <div className={styles.news_card}>
                                     <div className={styles.news_image}>
                                         {news.image_url ? (
-                                            <img src={news.image_url} alt={news.title} loading="lazy" />
+                                            <Image
+                                                src={news.image_url}
+                                                alt={news.title}
+                                                fill
+                                                sizes="120px"
+                                                style={{ objectFit: 'cover' }}
+                                            />
                                         ) : (
                                             <div className={styles.news_placeholder}>News</div>
                                         )}
@@ -86,7 +93,13 @@ export function Sidebar() {
                                 <div key={release.id} className={styles.release_item}>
                                     <div className={styles.release_image}>
                                         {release.artists?.image_url ? (
-                                            <img src={release.artists.image_url} alt={release.artists.name} loading="lazy" />
+                                            <Image
+                                                src={release.artists.image_url}
+                                                alt={release.artists.name}
+                                                fill
+                                                sizes="60px"
+                                                style={{ objectFit: 'cover' }}
+                                            />
                                         ) : (
                                             <div className={styles.release_placeholder}>
                                                 {release.artists?.name?.charAt(0) || '?'}

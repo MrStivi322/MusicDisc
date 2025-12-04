@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import useSWRInfinite from "swr/infinite"
 import { NewsCard } from "@/components/NewsCard"
 import { SkeletonCard } from "@/components/SkeletonLoader"
 import { Sidebar } from "@/components/Sidebar"
@@ -13,39 +15,15 @@ const ITEMS_PER_PAGE = 9;
 
 export default function NewsPage() {
     const { t } = useLanguage()
-    const [activeCategory, setActiveCategory] = useState("All")
-    const [news, setNews] = useState<News[]>([])
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || "All")
     const [categories, setCategories] = useState<string[]>(["All"])
-    const [loading, setLoading] = useState(true)
     const [mounted, setMounted] = useState(false)
-    const [page, setPage] = useState(1)
-    const [hasMore, setHasMore] = useState(true)
-    const [loadingMore, setLoadingMore] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-        loadCategories()
-    }, [])
-
-    useEffect(() => {
-        setPage(1)
-        setNews([])
-        fetchNews(1, true)
-    }, [activeCategory])
-
-    async function loadCategories() {
-        const categoriesList = await fetchCategoriesWithCache()
-        setCategories(categoriesList)
-    }
-
-    async function fetchNews(pageNum: number = 1, reset: boolean = false) {
-        if (reset) {
-            setLoading(true)
-        } else {
-            setLoadingMore(true)
-        }
-
-        const from = (pageNum - 1) * ITEMS_PER_PAGE
+    // SWR Fetcher
+    const fetchNews = async ([key, pageIndex, category]: [string, number, string]) => {
+        const from = pageIndex * ITEMS_PER_PAGE
         const to = from + ITEMS_PER_PAGE - 1
 
         let query = supabase
@@ -54,33 +32,58 @@ export default function NewsPage() {
             .order('published_at', { ascending: false })
             .range(from, to)
 
-        if (activeCategory !== "All") {
-            query = query.eq('category', activeCategory)
+        if (category !== "All") {
+            query = query.contains('category', [category])
         }
 
         const { data, error, count } = await query
 
-        if (error) {
-            console.error('Error fetching news:', error)
-        } else {
-            if (reset) {
-                setNews(data || [])
-            } else {
-                setNews(prev => [...prev, ...(data || [])])
-            }
+        if (error) throw error
+        return { data: data || [], count: count || 0 }
+    }
 
-            const totalLoaded = reset ? (data?.length || 0) : news.length + (data?.length || 0)
-            setHasMore(totalLoaded < (count || 0))
+    // SWR Key
+    const getKey = (pageIndex: number, previousPageData: { data: (News & { comments: { count: number }[] })[], count: number } | null) => {
+        if (previousPageData && !previousPageData.data.length) return null // reached the end
+        return ['news', pageIndex, activeCategory]
+    }
+
+    const { data, size, setSize, isValidating, isLoading } = useSWRInfinite(getKey, fetchNews, {
+        revalidateFirstPage: false,
+        revalidateOnFocus: false,
+        persistSize: true
+    })
+
+    const news = data ? data.flatMap(page => page.data) : []
+    const totalCount = data && data[0] ? data[0].count : 0
+    const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
+    const isEmpty = data?.[0]?.data.length === 0;
+    const isReachingEnd = isEmpty || (data && data[data.length - 1]?.data.length < ITEMS_PER_PAGE);
+
+    useEffect(() => {
+        setMounted(true)
+        loadCategories()
+
+        const savedScroll = sessionStorage.getItem('news_scroll_y')
+        if (savedScroll) {
+            window.scrollTo(0, parseInt(savedScroll))
+            sessionStorage.removeItem('news_scroll_y')
         }
+    }, [])
 
-        setLoading(false)
-        setLoadingMore(false)
+    useEffect(() => {
+        const params = new URLSearchParams()
+        if (activeCategory !== "All") params.set('category', activeCategory)
+        router.replace(`/news?${params.toString()}`, { scroll: false })
+    }, [activeCategory, router])
+
+    async function loadCategories() {
+        const categoriesList = await fetchCategoriesWithCache()
+        setCategories(categoriesList)
     }
 
     function handleLoadMore() {
-        const nextPage = page + 1
-        setPage(nextPage)
-        fetchNews(nextPage, false)
+        setSize(size + 1)
     }
 
     return (
@@ -90,14 +93,24 @@ export default function NewsPage() {
                     <h1 className="page-title">{t('news.title')}</h1>
                     <p className="page-subtitle">
                         {t('news.subtitle')}
+                        {!isLoading && totalCount > 0 && (
+                            <span style={{ opacity: 0.7, marginLeft: '0.5rem' }}>
+                                • {totalCount} {t('news.found') || 'found'}
+                            </span>
+                        )}
                     </p>
 
+                    <div className="sr-only" aria-live="polite" aria-atomic="true">
+                        {isLoading ? 'Loading news...' : `${totalCount} articles found`}
+                    </div>
                     <div className={styles.filter_bar}>
                         {categories.map((category) => (
                             <button
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
                                 className={`${styles.filter_button} ${activeCategory === category ? styles.active : ''}`}
+                                aria-label={`Filter by ${category}`}
+                                aria-pressed={activeCategory === category}
                             >
                                 {category === "All" ? "All" : (t(`category.${category}`) === `category.${category}` ? category : t(`category.${category}`))}
                             </button>
@@ -108,6 +121,7 @@ export default function NewsPage() {
                         value={activeCategory}
                         onChange={(e) => setActiveCategory(e.target.value)}
                         className={styles.mobile_filter_select}
+                        aria-label="Filter news by category"
                     >
                         {categories.map((category) => (
                             <option key={category} value={category}>
@@ -117,7 +131,7 @@ export default function NewsPage() {
                     </select>
                 </div>
 
-                {loading ? (
+                {isLoading ? (
                     <div className="content-layout">
                         <div className="news-grid">
                             <SkeletonCard variant="news" count={9} />
@@ -128,7 +142,7 @@ export default function NewsPage() {
                     <div className="content-layout animate-fade-in">
                         <div className="news-grid">
                             {news.map((article, index) => (
-                                <div key={article.id} className="grid-item" style={{ animationDelay: `${index * 0.05}s` }}>
+                                <div key={article.id} className="animate-entrance" style={{ animationDelay: `${index * 0.05}s` }}>
                                     <NewsCard
                                         id={article.id}
                                         title={article.title}
@@ -139,6 +153,10 @@ export default function NewsPage() {
                                         author={article.author || undefined}
                                         viewsCount={article.views_count || 0}
                                         commentsCount={(article as any).comments?.[0]?.count || 0}
+                                        onClick={() => {
+                                            sessionStorage.setItem('news_scroll_y', window.scrollY.toString())
+                                            sessionStorage.setItem('news_last_filters', JSON.stringify({ category: activeCategory }))
+                                        }}
                                     />
                                 </div>
                             ))}
@@ -150,11 +168,12 @@ export default function NewsPage() {
                             )}
                         </div>
 
-                        {hasMore && news.length > 0 && (
+                        {!isReachingEnd && !isEmpty && (
                             <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
                                 <button
                                     onClick={handleLoadMore}
-                                    disabled={loadingMore}
+                                    disabled={isLoadingMore}
+                                    className="ripple"
                                     style={{
                                         padding: '1rem 2rem',
                                         fontSize: '1rem',
@@ -163,12 +182,12 @@ export default function NewsPage() {
                                         border: 'none',
                                         background: 'linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(24, 95%, 65%) 100%)',
                                         color: 'white',
-                                        cursor: loadingMore ? 'not-allowed' : 'pointer',
-                                        opacity: loadingMore ? 0.6 : 1,
+                                        cursor: isLoadingMore ? 'not-allowed' : 'pointer',
+                                        opacity: isLoadingMore ? 0.6 : 1,
                                         transition: 'all 0.3s ease'
                                     }}
                                 >
-                                    {loadingMore ? 'Loading...' : 'Load More'}
+                                    {isLoadingMore ? 'Loading...' : 'Load More'}
                                 </button>
                             </div>
                         )}

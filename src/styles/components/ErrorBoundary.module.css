@@ -1,0 +1,220 @@
+.error_container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg,
+            hsl(var(--background-start)) 0%,
+            hsl(var(--background-end)) 100%);
+}
+
+.error_card {
+    max-width: 600px;
+    width: 100%;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-align: center;
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error_icon {
+    font-size: 5rem;
+    color: hsl(0, 80%, 60%);
+    margin-bottom: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.error_title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg,
+            hsl(0, 80%, 60%) 0%,
+            hsl(0, 80%, 70%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.error_message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
+}
+
+.error_details {
+    margin: 2rem 0;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.error_details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: hsl(24, 95%, 53%);
+    padding: 0.5rem;
+    user-select: none;
+}
+
+.error_details summary:hover {
+    color: hsl(24, 95%, 65%);
+}
+
+.error_stack {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.error_actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.btn i {
+    font-size: 1.2rem;
+}
+
+.btn_primary {
+    background: linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(24, 95%, 65%) 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(255, 111, 61, 0.3);
+}
+
+.btn_primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(255, 111, 61, 0.4);
+}
+
+.btn_primary:active {
+    transform: translateY(0);
+}
+
+.btn_secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn_secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.btn_secondary:active {
+    transform: translateY(0);
+}
+
+.error_help {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .error_card {
+        padding: 2rem 1.5rem;
+    }
+
+    .error_title {
+        font-size: 1.5rem;
+    }
+
+    .error_message {
+        font-size: 1rem;
+    }
+
+    .error_icon {
+        font-size: 4rem;
+    }
+
+    .error_actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .error_container {
+        padding: 1rem;
+    }
+
+    .error_card {
+        padding: 1.5rem 1rem;
+    }
+
+    .error_title {
+        font-size: 1.25rem;
+    }
+
+    .error_stack {
+        font-size: 0.75rem;
+    }
+}

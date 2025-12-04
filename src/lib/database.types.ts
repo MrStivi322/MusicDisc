@@ -38,7 +38,7 @@ export interface News {
     excerpt: string | null
     content: string | null
     image_url: string | null
-    category: string
+    category: string[]  // Changed from string to string[] for multiple categories
     author: string | null
     published_at: string
     views_count?: number

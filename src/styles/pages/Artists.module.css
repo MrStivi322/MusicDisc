@@ -8,11 +8,15 @@
 .filter_bar {
     display: flex;
     gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .search_container {
     position: relative;
     width: 100%;
+    flex: 1;
+    min-width: 250px;
 }
 
 .search_icon {
@@ -33,6 +37,7 @@
 
 .search_input {
     width: 100%;
+    min-height: 44px;
     padding: 1rem 1rem 1rem 3rem;
     border-radius: var(--radius-full);
     border: 1px solid var(--color-input);
@@ -59,14 +64,23 @@
     box-shadow: var(--shadow-sm);
 }
 
-.search_input:focus,
-.filter_select:focus {
+.search_input:focus-visible,
+.filter_select:focus-visible,
+.toggle_button:focus-visible,
+.clear_button:focus-visible {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1), var(--shadow-lg);
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1), var(--shadow-lg);
+}
+
+.toggle_button:active,
+.clear_button:active {
+    transform: scale(0.98);
 }
 
 .filter_select {
+    min-width: 12rem;
+    min-height: 44px;
     padding: 1rem 2rem 1rem 1rem;
     border-radius: var(--radius-full);
     border: 1px solid var(--color-input);
@@ -82,7 +96,6 @@
     background-repeat: no-repeat;
     background-position: right 0.5rem center;
     background-size: 1.2em;
-    min-width: 12rem;
 }
 
 .filter_select option {
@@ -100,22 +113,24 @@
     font-weight: 700;
 }
 
-.toggle_button,
-.clear_button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 1.25rem;
+.toggle_button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
     border-radius: var(--radius-full);
     border: 1px solid var(--color-input);
     background-color: var(--glass-inputs);
     backdrop-filter: blur(var(--blur-md));
     color: var(--color-muted-foreground);
-    font-size: var(--text-sm);
-    font-weight: 600;
+    font-size: var(--text-base);
     cursor: pointer;
     transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     white-space: nowrap;
+    font-weight: 600;
     flex-shrink: 0;
 }
 
@@ -131,21 +146,40 @@
 }
 
 .clear_button {
-    border: 1px solid transparent;
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-full);
+    border: none;
+    background: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(0, 90%, 50%));
+    color: white;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
+.clear_button:hover {
+    background: linear-gradient(135deg, hsl(0, 90%, 50%), hsl(0, 95%, 45%));
+    box-shadow: var(--shadow-lg);
+}
+
+/* Mobile Optimizations */
 @media (max-width: 1024px) {
     .filter_bar {
-        gap: 0.5rem;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: auto;
+        gap: 1rem 0.75rem;
     }
 
     .search_container {
-        min-width: 15rem;
+        flex-basis: 100%;
+    }
+
+    .filter_select {
+        flex-grow: 1;
     }
 }
 
@@ -155,15 +189,7 @@
     }
 
     .filter_bar {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
         gap: 0.75rem;
-    }
-
-    .search_container {
-        grid-column: 1 / -1;
-        width: 100%;
-        margin-bottom: 0;
     }
 
     .search_input {
@@ -178,25 +204,16 @@
 
     .filter_select {
         min-width: 0;
-        width: 100%;
-        padding: 0.75rem 0.5rem 0.75rem 0.75rem;
-        font-size: 0.75rem;
-        background-position: right 0.25rem center;
+        width: auto;
+        padding: 0.875rem 2rem 0.875rem 0.875rem;
+        font-size: var(--text-sm);
+        background-position: right 0.5rem center;
     }
 
-    .toggle_button {
-        width: 100%;
-        justify-content: center;
-        padding: 0.75rem 0.25rem;
-        font-size: 0.75rem;
-    }
-
+    .toggle_button,
     .clear_button {
-        grid-column: 1 / -1;
-        width: 100%;
-        justify-content: center;
-        padding: 0.75rem 1.5rem;
-        margin-top: 0;
+        padding: 0.875rem 1rem;
+        font-size: var(--text-sm);
     }
 }
 
@@ -205,13 +222,24 @@
         padding: 1.5rem 0.75rem 2.5rem;
     }
 
+    .filter_bar {
+        gap: 0.5rem;
+    }
+
     .search_input {
-        padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+        padding: 0.875rem 0.75rem 0.875rem 2.5rem;
     }
 
     .filter_select,
     .toggle_button,
     .clear_button {
         font-size: 0.875rem;
+    }
+
+    /* Ensure all buttons still meet 44px minimum */
+    .toggle_button,
+    .clear_button {
+        min-height: 44px;
+        min-width: 44px;
     }
 }

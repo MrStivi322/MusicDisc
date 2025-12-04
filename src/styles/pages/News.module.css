@@ -1,5 +1,5 @@
 .main {
-    padding: 3rem 1.5rem 5rem;
+    padding: var(--spacing-12) var(--spacing-6) var(--spacing-20);
 }
 
 .filter_bar {
@@ -52,13 +52,13 @@
 
 @media (max-width: 1024px) {
     .main {
-        padding: 2.5rem 1.5rem 4rem;
+        padding: var(--spacing-10) var(--spacing-6) var(--spacing-16);
     }
 }
 
 @media (max-width: 768px) {
     .main {
-        padding: 2rem 1rem 3rem;
+        padding: var(--spacing-8) var(--spacing-4) var(--spacing-12);
     }
 
     .filter_bar {
@@ -72,6 +72,6 @@
 
 @media (max-width: 480px) {
     .main {
-        padding: 1.5rem 0.75rem 2.5rem;
+        padding: var(--spacing-6) var(--spacing-3) var(--spacing-10);
     }
 }

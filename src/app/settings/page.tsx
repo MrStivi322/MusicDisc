@@ -5,8 +5,16 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import styles from "@/styles/pages/Settings.module.css"
-import { ImageCropper } from "@/components/ImageCropper"
+import dynamic from "next/dynamic"
+import { validate, profileUpdateSchema, passwordChangeSchema, calculatePasswordStrength } from "@/lib/validation"
+import { rateLimiter, RATE_LIMITS } from "@/lib/rateLimiter"
+
+const ImageCropper = dynamic(() => import("@/components/ImageCropper").then(mod => mod.ImageCropper), {
+    loading: () => <div>Loading...</div>,
+    ssr: false
+})
 
 const LANGUAGES = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -133,8 +141,9 @@ export default function SettingsPage() {
 
             setFormData(prev => ({ ...prev, avatarUrl: data.publicUrl }))
             setSuccess(t('settings.avatar.success'))
-        } catch (err: any) {
-            setError(err.message)
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'An unknown error occurred'
+            setError(message)
         } finally {
             setUploading(false)
         }
@@ -145,6 +154,32 @@ export default function SettingsPage() {
         setLoading(true)
         setError("")
         setSuccess("")
+
+        const limitCheck = rateLimiter.check(
+            `profile_${user!.id}`,
+            RATE_LIMITS.PROFILE_UPDATE
+        );
+
+        if (!limitCheck.canProceed) {
+            setError(
+                `Too many updates! Wait ${limitCheck.resetIn}s. ` +
+                `(Limit: ${RATE_LIMITS.PROFILE_UPDATE.maxAttempts}/min)`
+            );
+            setLoading(false);
+            return;
+        }
+
+        const result = validate(profileUpdateSchema, {
+            username: formData.username,
+            email: formData.email
+        })
+
+        if (!result.success) {
+            const firstError = Object.values(result.errors)[0]
+            setError(firstError || 'Invalid form data')
+            setLoading(false)
+            return
+        }
 
         try {
             const { error: profileError } = await supabase
@@ -165,22 +200,12 @@ export default function SettingsPage() {
 
             setSuccess(t('settings.profile.success'))
             setIsEditingProfile(false)
-        } catch (err: any) {
-            setError(err.message)
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'An unknown error occurred'
+            setError(message)
         } finally {
             setLoading(false)
         }
-    }
-
-    const calculatePasswordStrength = (password: string) => {
-        if (!password) return 0
-        let score = 0
-        if (password.length >= 6) score += 1
-        if (password.length >= 10) score += 1
-        if (/[A-Z]/.test(password)) score += 1
-        if (/[0-9]/.test(password)) score += 1
-        if (/[^A-Za-z0-9]/.test(password)) score += 1
-        return Math.min(score, 5)
     }
 
     const handleChangePassword = async (e: React.FormEvent) => {
@@ -189,14 +214,30 @@ export default function SettingsPage() {
         setError("")
         setSuccess("")
 
-        try {
-            if (passwordData.newPassword !== passwordData.confirmPassword) {
-                throw new Error(t('settings.error.password_mismatch'))
-            }
-            if (passwordData.newPassword.length < 6) {
-                throw new Error(t('settings.error.password_length'))
-            }
+        const limitCheck = rateLimiter.check(
+            `password_${user!.id}`,
+            RATE_LIMITS.PASSWORD_CHANGE
+        );
 
+        if (!limitCheck.canProceed) {
+            setError(
+                `Too many password change attempts! Wait ${Math.ceil(limitCheck.resetIn / 60)} minutes. ` +
+                `(Limit: ${RATE_LIMITS.PASSWORD_CHANGE.maxAttempts} per 5 minutes)`
+            );
+            setLoading(false);
+            return;
+        }
+
+        const result = validate(passwordChangeSchema, passwordData)
+
+        if (!result.success) {
+            const firstError = Object.values(result.errors)[0]
+            setError(firstError || 'Invalid form data')
+            setLoading(false)
+            return
+        }
+
+        try {
             const { error: signInError } = await supabase.auth.signInWithPassword({
                 email: user!.email!,
                 password: passwordData.currentPassword
@@ -221,8 +262,9 @@ export default function SettingsPage() {
             setSuccess(t('settings.password.success'))
             setIsChangingPassword(false)
             setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-        } catch (err: any) {
-            setError(err.message)
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'An unknown error occurred'
+            setError(message)
         } finally {
             setLoading(false)
         }
@@ -267,7 +309,7 @@ export default function SettingsPage() {
                             {LANGUAGES.map((lang) => (
                                 <button
                                     key={lang.code}
-                                    onClick={() => setLanguage(lang.code as any)}
+                                    onClick={() => setLanguage(lang.code as 'en' | 'es')}
                                     className={`${styles.language_card} ${language === lang.code ? styles.language_card_active : ''}`}
                                 >
                                     <span className={styles.flag}>{lang.flag}</span>
@@ -293,7 +335,14 @@ export default function SettingsPage() {
                                 <div className={styles.avatar_section}>
                                     <div className={styles.avatar_wrapper}>
                                         {formData.avatarUrl ? (
-                                            <img src={formData.avatarUrl} alt="Avatar" className={styles.avatar_image} loading="lazy" />
+                                            <Image
+                                                src={formData.avatarUrl}
+                                                alt="Avatar"
+                                                className={styles.avatar_image}
+                                                width={120}
+                                                height={120}
+                                                style={{ objectFit: 'cover' }}
+                                            />
                                         ) : (
                                             <div className={styles.avatar_placeholder}>
                                                 {formData.username?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}

@@ -16,18 +16,16 @@ export async function fetchGenresWithCache(): Promise<string[]> {
 
     const cached = cache.get<string[]>(cacheKey);
     if (cached) {
-        // console.log('✅ Cache hit: genres');
         return cached;
     }
 
-    // console.log('🔄 Cache miss: genres - fetching from DB');
+
     const { data, error } = await supabase
         .from('artists')
         .select('genre')
         .order('genre');
 
     if (error) {
-        // console.error('Error fetching genres:', error);
         return ['All'];
     }
 
@@ -47,24 +45,28 @@ export async function fetchCategoriesWithCache(): Promise<string[]> {
 
     const cached = cache.get<string[]>(cacheKey);
     if (cached) {
-        // console.log('✅ Cache hit: categories');
         return cached;
     }
 
-    // console.log('🔄 Cache miss: categories - fetching from DB');
+
     const { data, error } = await supabase
         .from('news')
         .select('category')
         .order('category');
 
     if (error) {
-        // console.error('Error fetching categories:', error);
         return ['All'];
     }
 
-    const uniqueCategories = Array.from(
-        new Set(data?.map(item => item.category).filter(Boolean))
-    ) as string[];
+    // Flatten arrays and get unique categories
+    const allCategories = data?.reduce((acc: string[], item) => {
+        if (item.category && Array.isArray(item.category)) {
+            return [...acc, ...item.category];
+        }
+        return acc;
+    }, []) || [];
+
+    const uniqueCategories = Array.from(new Set(allCategories)).sort();
 
     const result = ['All', ...uniqueCategories];
 
@@ -78,11 +80,10 @@ export async function fetchArtistWithCache(id: string) {
 
     const cached = cache.get<Artist>(cacheKey);
     if (cached) {
-        // console.log(`✅ Cache hit: artist ${id}`);
         return cached;
     }
 
-    // console.log(`🔄 Cache miss: artist ${id} - fetching from DB`);
+
     const { data, error } = await supabase
         .from('artists')
         .select('*')
@@ -103,11 +104,10 @@ export async function fetchNewsWithCache(id: string) {
 
     const cached = cache.get<News>(cacheKey);
     if (cached) {
-        // console.log(`✅ Cache hit: news ${id}`);
         return { data: cached, error: null };
     }
 
-    // console.log(`🔄 Cache miss: news ${id} - fetching from DB`);
+
     const { data, error } = await supabase
         .from('news')
         .select('*')

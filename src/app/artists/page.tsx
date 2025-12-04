@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import useSWRInfinite from "swr/infinite"
 import { ArtistCard } from "@/components/ArtistCard"
 import { SkeletonCard } from "@/components/SkeletonLoader"
 import { supabase, fetchGenresWithCache } from "@/lib/supabase"
@@ -13,46 +15,22 @@ const ITEMS_PER_PAGE = 12;
 
 export default function ArtistsPage() {
     const { t } = useLanguage()
-    const [searchQuery, setSearchQuery] = useState("")
-    const [selectedGenre, setSelectedGenre] = useState("All")
-    const [artists, setArtists] = useState<Artist[]>([])
-    const [loading, setLoading] = useState(true)
-    const [genres, setGenres] = useState<string[]>(["All"])
-    const [showTopOnly, setShowTopOnly] = useState(false)
-    const [sortBy, setSortBy] = useState<'followers' | 'name' | 'newest'>('followers')
-    const [mounted, setMounted] = useState(false)
-    const [page, setPage] = useState(1)
-    const [hasMore, setHasMore] = useState(true)
-    const [loadingMore, setLoadingMore] = useState(false)
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
-    
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "")
+    const [selectedGenre, setSelectedGenre] = useState(searchParams.get('genre') || "All")
+    const [genres, setGenres] = useState<string[]>(["All"])
+    const [showTopOnly, setShowTopOnly] = useState(searchParams.get('top') === 'true')
+    const [sortBy, setSortBy] = useState<'followers' | 'name' | 'newest'>((searchParams.get('sort') as 'followers' | 'name' | 'newest') || 'followers')
+    const [mounted, setMounted] = useState(false)
+
+
     const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
-    useEffect(() => {
-        setMounted(true)
-        loadGenres()
-    }, [])
-
-    useEffect(() => {
-        
-        setPage(1)
-        setArtists([])
-        fetchArtists(1, true)
-    }, [selectedGenre, showTopOnly, debouncedSearchQuery, sortBy])
-
-    async function loadGenres() {
-        const genresList = await fetchGenresWithCache()
-        setGenres(genresList)
-    }
-
-    async function fetchArtists(pageNum: number = 1, reset: boolean = false) {
-        if (reset) {
-            setLoading(true)
-        } else {
-            setLoadingMore(true)
-        }
-
-        const from = (pageNum - 1) * ITEMS_PER_PAGE
+    // SWR Fetcher
+    const fetchArtists = async ([key, pageIndex, query, genre, top, sort]: [string, number, string, string, boolean, string]) => {
+        const from = pageIndex * ITEMS_PER_PAGE
         const to = from + ITEMS_PER_PAGE - 1
 
         let queryBuilder = supabase
@@ -60,52 +38,82 @@ export default function ArtistsPage() {
             .select('*', { count: 'exact' })
             .range(from, to)
 
-        
-        if (sortBy === 'name') {
+        if (sort === 'name') {
             queryBuilder = queryBuilder.order('name', { ascending: true })
-        } else if (sortBy === 'newest') {
+        } else if (sort === 'newest') {
             queryBuilder = queryBuilder.order('created_at', { ascending: false })
         } else {
             queryBuilder = queryBuilder.order('followers_count', { ascending: false })
         }
 
-        if (selectedGenre !== "All") {
-            queryBuilder = queryBuilder.eq('genre', selectedGenre)
+        if (genre !== "All") {
+            queryBuilder = queryBuilder.eq('genre', genre)
         }
 
-        if (showTopOnly) {
+        if (top) {
             queryBuilder = queryBuilder.eq('is_top', true)
         }
 
-        if (debouncedSearchQuery) {
-            queryBuilder = queryBuilder.ilike('name', '%' + debouncedSearchQuery + '%');
+        if (query) {
+            queryBuilder = queryBuilder.ilike('name', '%' + query + '%');
         }
 
         const { data, error, count } = await queryBuilder
 
-        if (error) {
-            console.error('Error fetching artists:', error)
-        } else {
-            if (reset) {
-                setArtists(data || [])
-            } else {
-                setArtists(prev => [...prev, ...(data || [])])
-            }
+        if (error) throw error
+        return { data: data || [], count: count || 0 }
+    }
 
-            
-            const totalLoaded = reset ? (data?.length || 0) : artists.length + (data?.length || 0)
-            setHasMore(totalLoaded < (count || 0))
+    // SWR Key
+    const getKey = (pageIndex: number, previousPageData: { data: Artist[], count: number } | null) => {
+        if (previousPageData && !previousPageData.data.length) return null // reached the end
+        return ['artists', pageIndex, debouncedSearchQuery, selectedGenre, showTopOnly, sortBy]
+    }
+
+    const { data, size, setSize, isValidating, isLoading } = useSWRInfinite(getKey, fetchArtists, {
+        revalidateFirstPage: false,
+        revalidateOnFocus: false,
+        persistSize: true
+    })
+
+    const artists = data ? data.flatMap(page => page.data) : []
+    const totalCount = data && data[0] ? data[0].count : 0
+    const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
+    const isEmpty = data?.[0]?.data.length === 0;
+    const isReachingEnd = isEmpty || (data && data[data.length - 1]?.data.length < ITEMS_PER_PAGE);
+
+    useEffect(() => {
+        setMounted(true)
+        loadGenres()
+
+        // Scroll restoration
+        const savedScroll = sessionStorage.getItem('artists_scroll_y')
+        if (savedScroll) {
+            window.scrollTo(0, parseInt(savedScroll))
+            sessionStorage.removeItem('artists_scroll_y')
         }
+    }, [])
 
-        setLoading(false)
-        setLoadingMore(false)
+    // Update URL when filters change
+    useEffect(() => {
+        const params = new URLSearchParams()
+        if (debouncedSearchQuery) params.set('q', debouncedSearchQuery)
+        if (selectedGenre !== "All") params.set('genre', selectedGenre)
+        if (showTopOnly) params.set('top', 'true')
+        if (sortBy !== 'followers') params.set('sort', sortBy)
+
+        router.replace(`/artists?${params.toString()}`, { scroll: false })
+    }, [debouncedSearchQuery, selectedGenre, showTopOnly, sortBy, router])
+
+    async function loadGenres() {
+        const genresList = await fetchGenresWithCache()
+        setGenres(genresList)
     }
 
     function handleLoadMore() {
-        const nextPage = page + 1
-        setPage(nextPage)
-        fetchArtists(nextPage, false)
+        setSize(size + 1)
     }
+
 
     return (
         <main className={styles.main}>
@@ -116,17 +124,26 @@ export default function ArtistsPage() {
                     </h1>
                     <p className="page-subtitle">
                         {t('artists.subtitle')}
+                        {!isLoading && totalCount > 0 && (
+                            <span style={{ opacity: 0.7, marginLeft: '0.5rem' }}>
+                                • {totalCount} {t('artists.found') || 'found'}
+                            </span>
+                        )}
                     </p>
 
+                    <div className="sr-only" aria-live="polite" aria-atomic="true">
+                        {isLoading ? 'Loading artists...' : `${totalCount} artists found`}
+                    </div>
                     <div className={styles.filter_bar}>
                         <div className={styles.search_container}>
                             <i className={`bx bx-search ${styles.search_icon}`}></i>
                             <input
                                 type="text"
-                                placeholder={t('artists.search')}
+                                placeholder={t('artists.search_placeholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className={styles.search_input}
+                                aria-label="Search artists by name"
                             />
                         </div>
 
@@ -134,6 +151,7 @@ export default function ArtistsPage() {
                             value={selectedGenre}
                             onChange={(e) => setSelectedGenre(e.target.value)}
                             className={styles.filter_select}
+                            aria-label="Filter by genre"
                         >
                             <option value="All">All Genres</option>
                             {genres.filter(g => g !== "All").map((genre) => (
@@ -145,8 +163,9 @@ export default function ArtistsPage() {
 
                         <select
                             value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
+                            onChange={(e) => setSortBy(e.target.value as 'followers' | 'name' | 'newest')}
                             className={styles.filter_select}
+                            aria-label="Sort artists"
                         >
                             <option value="followers">Most Popular</option>
                             <option value="name">Name (A-Z)</option>
@@ -157,9 +176,10 @@ export default function ArtistsPage() {
                             onClick={() => setShowTopOnly(!showTopOnly)}
                             className={`${styles.toggle_button} ${showTopOnly ? styles.active : ''}`}
                             title={t('artists.show_top')}
+                            aria-label="Show only top artists"
+                            aria-pressed={showTopOnly}
                         >
-                            <i className='bx bxs-hot'></i>
-                            <span className="sr-only">{t('artists.show_top')}</span>
+                            <i className='bx bxs-hot'></i>{t('artists.show_top')}
                         </button>
 
                         {(selectedGenre !== "All" || showTopOnly || searchQuery) && (
@@ -169,17 +189,18 @@ export default function ArtistsPage() {
                                     setShowTopOnly(false);
                                     setSearchQuery("");
                                     setSortBy("followers");
+                                    router.replace('/artists', { scroll: false });
                                 }}
                                 className={styles.clear_button}
+                                aria-label="Clear all filters"
                             >
-                                <i className='bx bx-x'></i>
-                                Clear
+                                <i className='bx bx-x'></i>{t('artists.clear')}
                             </button>
                         )}
                     </div>
                 </div>
 
-                {loading ? (
+                {isLoading ? (
                     <div className="content-grid">
                         <SkeletonCard variant="artist" count={12} />
                     </div>
@@ -189,7 +210,7 @@ export default function ArtistsPage() {
                             {artists.map((artist, index) => (
                                 <div
                                     key={artist.id}
-                                    className={`grid-item ${artist.is_wide ? 'grid-item-wide' : ''}`}
+                                    className={`animate-entrance ${artist.is_wide ? 'grid-item-wide' : ''}`}
                                     style={{ animationDelay: `${index * 0.05}s` }}
                                 >
                                     <ArtistCard
@@ -200,6 +221,15 @@ export default function ArtistsPage() {
                                         followers={artist.followers_count}
                                         isWide={artist.is_wide}
                                         showFireEffect={showTopOnly && artist.is_top}
+                                        onClick={() => {
+                                            sessionStorage.setItem('artists_scroll_y', window.scrollY.toString())
+                                            sessionStorage.setItem('last_filters', JSON.stringify({
+                                                genre: selectedGenre,
+                                                sort: sortBy,
+                                                top: showTopOnly,
+                                                q: searchQuery
+                                            }))
+                                        }}
                                     />
                                 </div>
                             ))}
@@ -212,12 +242,12 @@ export default function ArtistsPage() {
                             </div>
                         )}
 
-                        {hasMore && artists.length > 0 && (
+                        {!isReachingEnd && !isEmpty && (
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
                                 <button
                                     onClick={handleLoadMore}
-                                    disabled={loadingMore}
-                                    className={styles.load_more_button}
+                                    disabled={isLoadingMore}
+                                    className={`${styles.load_more_button} ripple`}
                                     style={{
                                         padding: '1rem 2rem',
                                         fontSize: '1rem',
@@ -226,12 +256,12 @@ export default function ArtistsPage() {
                                         border: 'none',
                                         background: 'linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(24, 95%, 65%) 100%)',
                                         color: 'white',
-                                        cursor: loadingMore ? 'not-allowed' : 'pointer',
-                                        opacity: loadingMore ? 0.6 : 1,
+                                        cursor: isLoadingMore ? 'not-allowed' : 'pointer',
+                                        opacity: isLoadingMore ? 0.6 : 1,
                                         transition: 'all 0.3s ease'
                                     }}
                                 >
-                                    {loadingMore ? 'Loading...' : 'Load More'}
+                                    {isLoadingMore ? 'Loading...' : 'Load More'}
                                 </button>
                             </div>
                         )}
