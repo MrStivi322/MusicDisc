@@ -320,7 +320,7 @@ const translations = {
         'home.stats.updates': 'Actualizaciones',
         'home.features.title': '¿Por qué elegir MusicDisc?',
         'home.features.discover.title': 'Descubre',
-        'home.features.discover.desc': 'Explora miles de artistas de todos los géneros',
+        'home.features.discover.desc': 'Explora artistas de todos los géneros',
         'home.features.news.title': 'Mantente Actualizado',
         'home.features.news.desc': 'Últimas noticias musicales y lanzamientos diarios',
         'home.features.listen.title': 'Escucha',
