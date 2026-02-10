@@ -20,7 +20,9 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 
-export default function ForumPage() {
+import { Suspense } from 'react'
+
+function ForumPageContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { user } = useAuth()
@@ -202,5 +204,13 @@ export default function ForumPage() {
                 />
             </Modal>
         </main>
+    )
+}
+
+export default function ForumPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ForumPageContent />
+        </Suspense>
     )
 }
