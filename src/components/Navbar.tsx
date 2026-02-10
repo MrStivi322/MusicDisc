@@ -76,7 +76,7 @@ export function Navbar() {
     const navLinks = [
         { href: "/", label: t('nav.home') },
         { href: "/artists", label: t('nav.artists') },
-        { href: "/news", label: t('nav.news') },
+        { href: "/forum", label: t('nav.forum') },
     ]
 
     return (
@@ -127,7 +127,6 @@ export function Navbar() {
                             className={`${styles.btn} ${styles.btn_login}`}
                         >
                             <i className="bx bx-user-circle"></i>
-                            <span>{t('nav.login')}</span>
                         </Link>
                     )}
                 </div>

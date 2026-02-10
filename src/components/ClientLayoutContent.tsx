@@ -6,10 +6,11 @@ import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
 import PageTransition from "@/components/PageTransition";
+import SpotifyPlayer from "@/components/player/SpotifyPlayer";
 
 export default function ClientLayoutContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const showFooter = ['/', '/contact', '/privacy', '/terms'].includes(pathname);
+    const showFooter = ['/', '/privacy', '/terms'].includes(pathname);
 
     return (
         <>
@@ -17,6 +18,7 @@ export default function ClientLayoutContent({ children }: { children: React.Reac
             <PageTransition>{children}</PageTransition>
             {showFooter && <Footer />}
             <ScrollToTop />
+            <SpotifyPlayer />
         </>
     );
 }

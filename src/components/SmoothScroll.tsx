@@ -24,9 +24,24 @@ export default function SmoothScroll() {
 
         rafId = requestAnimationFrame(raf)
 
+        // Stop Lenis when modal is open (body overflow: hidden)
+        const observer = new MutationObserver(() => {
+            if (document.body.style.overflow === 'hidden') {
+                lenis.stop()
+            } else {
+                lenis.start()
+            }
+        })
+
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['style']
+        })
+
         return () => {
             lenis.destroy()
             cancelAnimationFrame(rafId)
+            observer.disconnect()
         }
     }, [])
 

@@ -40,40 +40,7 @@ export async function fetchGenresWithCache(): Promise<string[]> {
     return result;
 }
 
-export async function fetchCategoriesWithCache(): Promise<string[]> {
-    const cacheKey = 'categories_list';
 
-    const cached = cache.get<string[]>(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
-
-    const { data, error } = await supabase
-        .from('news')
-        .select('category')
-        .order('category');
-
-    if (error) {
-        return ['All'];
-    }
-
-    // Flatten arrays and get unique categories
-    const allCategories = data?.reduce((acc: string[], item) => {
-        if (item.category && Array.isArray(item.category)) {
-            return [...acc, ...item.category];
-        }
-        return acc;
-    }, []) || [];
-
-    const uniqueCategories = Array.from(new Set(allCategories)).sort();
-
-    const result = ['All', ...uniqueCategories];
-
-    cache.set(cacheKey, result, 10 * 60 * 1000);
-
-    return result;
-}
 
 export async function fetchArtistWithCache(id: string) {
     const cacheKey = `artist_${id}`;

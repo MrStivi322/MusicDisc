@@ -9,7 +9,7 @@ export function Footer() {
     const currentYear = new Date().getFullYear()
 
     const footerLinks = [
-        { label: t('footer.contact') || 'Contact', href: '/contact' },
+
         { label: t('footer.privacy') || 'Privacy', href: '/privacy' },
         { label: t('footer.terms') || 'Terms', href: '/terms' },
     ]

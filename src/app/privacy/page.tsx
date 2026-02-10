@@ -68,17 +68,7 @@ export default function PrivacyPage() {
                 {/* Privacidad de Menores: */}
                 <section className={styles.section}>
                     <h2>Privacidad de Menores</h2>
-                    <p>Nuestro servicio no está destinado a usuarios menores de 13 años. No recopilamos datos de niños. Si descubrimos que un niño menor de 13 años ha proporcionado información personal, la eliminaremos inmediatamente. Los padres/tutores deben contactarnos si esto ocurre.</p>
-                </section>
-
-                {/* Contáctanos: */}
-                <section className={styles.section}>
-                    <h2>Contáctanos</h2>
-                    <p>Preguntas relacionadas con la privacidad, solicitudes de datos o inquietudes.</p>
-                    <ul>
-                        <li><i className='bxl bx-twitter-x'></i> <a href="https://x.com/MusicDiscApp">@MusicDiscApp</a></li>
-                    </ul>
-                    <p><i className='bx bx-timer'></i> 48 horas</p>
+                    <p>Nuestro servicio no está destinado a usuarios menores de 13 años. No recopilamos datos de niños. Si descubrimos que un niño menor de 13 años ha proporcionado información personal, la eliminaremos inmediatamente.</p>
                 </section>
             </div>
         </main >

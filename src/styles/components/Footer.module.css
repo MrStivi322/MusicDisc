@@ -1,6 +1,6 @@
 .footer {
     margin-top: auto;
-    padding: 2rem;
+    padding: 1rem 2rem;
     border-top: 1px solid var(--glass-border);
     background: var(--glass-background);
     backdrop-filter: blur(var(--blur-md));
@@ -33,7 +33,7 @@
     display: flex;
     gap: 2rem;
     flex: 1;
-    justify-content: center;
+    justify-content: flex-end;
 }
 
 .footer_link {

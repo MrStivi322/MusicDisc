@@ -1,0 +1,104 @@
+.player_container {
+    position: fixed;
+    top: 6rem;
+    right: 0;
+    z-index: var(--z-index-modal);
+    width: 350px;
+    background: var(--glass-background);
+    backdrop-filter: blur(var(--blur-md));
+    border: 1px solid var(--glass-border);
+    border-right: none;
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translateX(calc(100% - 1.5rem));
+}
+
+.player_container:hover,
+.player_container:focus-within {
+    transform: translateX(0);
+}
+
+/* Optional: Add a visual indicator/tab on the left edge */
+.player_container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary) 1%, transparent 1%);
+    opacity: 0.4;
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+}
+
+/*
+   Hack to target the internal structure of react-spotify-web-playback
+   Since we can't easily change the DOM structure, we use flex-wrap and ordering.
+*/
+.player_wrapper>div>div {
+    flex-wrap: wrap !important;
+    align-content: center !important;
+    justify-content: center !important;
+}
+
+/* Track image border radius */
+.player_wrapper [data-component-name="Info"] img {
+    border-radius: var(--radius-md) !important;
+}
+
+/* Hide Devices Icon (usually the last button group or specific SVG) */
+/* We target the button that likely contains the devices icon */
+.player_wrapper button[aria-label="Devices"],
+.player_wrapper button[title="Devices"] {
+    display: none !important;
+}
+
+/* Make info take full width on top */
+.player_wrapper [data-component-name="Info"] {
+    flex: 1 1 100% !important;
+    margin-bottom: 0.5rem !important;
+    justify-content: space-between !important;
+    text-align: start !important;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+/* Center controls and set to 100% width */
+.player_wrapper [data-component-name="Controls"] {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0 0 .5rem 0 !important;
+}
+
+/* Move Actions next to controls buttons */
+.player_wrapper [data-component-name="Actions"] {
+    flex: 0 0 auto !important;
+    justify-content: center !important;
+    position: absolute !important;
+    left: 11rem !important;
+    bottom: 16% !important;
+    height: auto !important;
+    background: transparent !important;
+}
+
+/* Align internal control buttons to the end */
+.player_wrapper [class*="ControlsButtons"] {
+    justify-content: start !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+    .player_container {
+        top: auto;
+        bottom: 80px;
+        /* Above bottom tabs on mobile usually */
+        right: 0;
+        width: 90%;
+        max-width: 350px;
+        border-radius: 12px 0 0 12px;
+    }
+}
+
+.player_wrapper {
+    width: 100%;
+}

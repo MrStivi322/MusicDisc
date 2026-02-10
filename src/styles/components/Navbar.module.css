@@ -140,15 +140,19 @@
 }
 
 .btn_login {
+    width: 2.7rem;
+    height: 2.7rem;
+    padding: 0;
+    border-radius: var(--radius-full);
     background: var(--gradient-primary);
     color: white;
     box-shadow: var(--shadow-md);
+    justify-content: center;
 }
 
 .btn_login:hover {
     color: white;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
 }
 
 .btn_login:active {
@@ -156,7 +160,7 @@
 }
 
 .btn_login i {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
 }
 
 .mobile_menu_btn {
@@ -267,16 +271,7 @@
         gap: 0.5rem;
     }
 
-    .btn_login span {
-        display: none;
-    }
 
-    .btn_login {
-        padding: 0.75rem;
-        min-width: 44px;
-        min-height: 44px;
-        justify-content: center;
-    }
 }
 
 @media (max-width: 480px) {

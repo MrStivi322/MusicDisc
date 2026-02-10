@@ -11,6 +11,13 @@ import styles from "@/styles/pages/Artists.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { useDebounce } from "@/hooks/useDebounce"
 
+// New Standard Components
+import { SectionHeader } from '@/components/ui/SectionHeader'
+import { FilterBar } from '@/components/ui/FilterBar'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+
 export const dynamic = 'force-dynamic'
 
 const ITEMS_PER_PAGE = 12;
@@ -132,39 +139,27 @@ function ArtistsContent() {
 
     return (
         <div className="page-container">
-            <div className={`page-header ${mounted ? 'animate-fade-in' : ''}`}>
-                <h1 className="page-title">
-                    {t('artists.title')}
-                </h1>
-                <p className="page-subtitle">
-                    {t('artists.subtitle')}
-                    {!isLoading && totalCount > 0 && (
-                        <span style={{ opacity: 0.7, marginLeft: '0.5rem' }}>
-                            • {totalCount} {t('artists.found') || 'found'}
-                        </span>
-                    )}
-                </p>
+            <div className={mounted ? 'animate-fade-in' : ''}>
+                <SectionHeader
+                    title={t('artists.title')}
+                    subtitle={t('artists.subtitle')}
+                />
 
-                <div className="sr-only" aria-live="polite" aria-atomic="true">
-                    {isLoading ? 'Loading artists...' : `${totalCount} artists found`}
-                </div>
-                <div className={styles.filter_bar}>
-                    <div className={styles.search_container}>
-                        <i className={`bx bx-search ${styles.search_icon}`}></i>
-                        <input
-                            type="text"
+                <FilterBar>
+                    <div className="flex-grow-1" style={{ minWidth: '250px', flex: '1 1 300px' }}>
+                        <Input
                             placeholder={t('artists.search_placeholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className={styles.search_input}
+                            icon="bx-search"
                             aria-label="Search artists by name"
                         />
                     </div>
 
-                    <select
+                    <Select
                         value={selectedGenre}
                         onChange={(e) => setSelectedGenre(e.target.value)}
-                        className={styles.filter_select}
+                        style={{ minWidth: '180px' }}
                         aria-label="Filter by genre"
                     >
                         <option value="All">All Genres</option>
@@ -173,45 +168,28 @@ function ArtistsContent() {
                                 {t(`genre.${genre}`) === `genre.${genre}` ? genre : t(`genre.${genre}`)}
                             </option>
                         ))}
-                    </select>
+                    </Select>
 
-                    <select
+                    <Select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'followers' | 'name' | 'newest')}
-                        className={styles.filter_select}
+                        style={{ minWidth: '160px' }}
                         aria-label="Sort artists"
                     >
                         <option value="followers">Most Popular</option>
                         <option value="name">Name (A-Z)</option>
                         <option value="newest">Newest</option>
-                    </select>
+                    </Select>
 
-                    <button
+                    <Button
+                        variant={showTopOnly ? 'primary' : 'outline'}
                         onClick={() => setShowTopOnly(!showTopOnly)}
-                        className={`${styles.toggle_button} ${showTopOnly ? styles.active : ''}`}
+                        leftIcon={<i className='bx bxs-hot'></i>}
                         title={t('artists.show_top')}
-                        aria-label="Show only top artists"
-                        aria-pressed={showTopOnly}
                     >
-                        <i className='bx bxs-hot'></i>{t('artists.show_top')}
-                    </button>
-
-                    {(selectedGenre !== "All" || showTopOnly || searchQuery) && (
-                        <button
-                            onClick={() => {
-                                setSelectedGenre("All");
-                                setShowTopOnly(false);
-                                setSearchQuery("");
-                                setSortBy("followers");
-                                router.replace('/artists', { scroll: false });
-                            }}
-                            className={styles.clear_button}
-                            aria-label="Clear all filters"
-                        >
-                            <i className='bx bx-x'></i>{t('artists.clear')}
-                        </button>
-                    )}
-                </div>
+                        {t('artists.show_top')}
+                    </Button>
+                </FilterBar>
             </div>
 
             {isLoading ? (
@@ -258,25 +236,15 @@ function ArtistsContent() {
 
                     {!isReachingEnd && !isEmpty && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
-                            <button
+                            <Button
                                 onClick={handleLoadMore}
                                 disabled={isLoadingMore}
-                                className={`${styles.load_more_button} ripple`}
-                                style={{
-                                    padding: '1rem 2rem',
-                                    fontSize: '1rem',
-                                    fontWeight: '600',
-                                    borderRadius: '12px',
-                                    border: 'none',
-                                    background: 'linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(24, 95%, 65%) 100%)',
-                                    color: 'white',
-                                    cursor: isLoadingMore ? 'not-allowed' : 'pointer',
-                                    opacity: isLoadingMore ? 0.6 : 1,
-                                    transition: 'all 0.3s ease'
-                                }}
+                                isLoading={isLoadingMore}
+                                size="lg"
+                                variant="primary"
                             >
                                 {isLoadingMore ? 'Loading...' : 'Load More'}
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </>

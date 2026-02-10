@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PlayerProvider } from "@/contexts/PlayerContext";
+import { SpotifyProvider } from "@/contexts/SpotifyContext";
 import ClientLayoutContent from "@/components/ClientLayoutContent";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -97,9 +98,11 @@ export default function RootLayout({
             <LanguageProvider>
               <AuthProvider>
                 <PlayerProvider>
-                  <SmoothScroll />
-                  <AnimatedBackground />
-                  <ClientLayoutContent>{children}</ClientLayoutContent>
+                  <SpotifyProvider>
+                    <SmoothScroll />
+                    <AnimatedBackground />
+                    <ClientLayoutContent>{children}</ClientLayoutContent>
+                  </SpotifyProvider>
                 </PlayerProvider>
               </AuthProvider>
             </LanguageProvider>

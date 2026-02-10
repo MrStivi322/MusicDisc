@@ -7,6 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import styles from "@/styles/components/UserMenu.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { useSpotify } from "@/contexts/SpotifyContext"
 
 interface UserMenuProps {
     userEmail: string
@@ -20,6 +21,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
     const router = useRouter()
 
     const { t } = useLanguage()
+    const { token, login, logout } = useSpotify()
 
     useEffect(() => {
         async function loadProfile() {
@@ -98,6 +100,8 @@ export function UserMenu({ userEmail }: UserMenuProps) {
                         <i className={`bx bx-cog ${styles.dropdown_icon}`}></i>
                         {t('user.settings')}
                     </Link>
+
+
 
                     <div className={styles.dropdown_divider} />
 

@@ -80,13 +80,7 @@ export default function TermsPage() {
 
                     <h2>Información de Artistas</h2>
                     <p>Las imágenes de artistas, portadas de álbumes e información de canciones son propiedad de sus respectivos dueños. Mostramos este contenido bajo uso justo con fines informativos y de descubrimiento.</p>
-                    <p>Si crees que el contenido en nuestro sitio infringe tus derechos de autor, contáctanos con:</p>
-                    <ul>
-                        <li>Identificación de la obra protegida por derechos de autor</li>
-                        <li>URL del material supuestamente infractor</li>
-                        <li>Tu información de contacto</li>
-                        <li>Una declaración de buena fe</li>
-                    </ul>
+
                 </section>
 
                 <section className={styles.section}>

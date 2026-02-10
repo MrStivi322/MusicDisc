@@ -1,15 +1,14 @@
 "use client"
+import Link from 'next/link'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import type { News, UpcomingRelease } from '@/lib/database.types'
+import styles from '@/styles/components/forum/ForumSidebar.module.css' // Component specific styles
+import { useLanguage } from '@/contexts/LanguageContext'
 
-import Link from "next/link"
-import Image from "next/image"
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-import type { News, UpcomingRelease } from "@/lib/database.types"
-import styles from "@/styles/components/Sidebar.module.css"
-import { useLanguage } from "@/contexts/LanguageContext"
-
-export function Sidebar() {
-    const { t } = useLanguage()
+export function ForumSidebar() {
+    const { t, language } = useLanguage()
     const [topNews, setTopNews] = useState<News[]>([])
     const [upcomingReleases, setUpcomingReleases] = useState<UpcomingRelease[]>([])
 
@@ -23,17 +22,14 @@ export function Sidebar() {
                 .order('views_count', { ascending: false })
                 .limit(4)
 
-            const { data: releasesData, error: releasesError } = await supabase
+            const { data: releasesData } = await supabase
                 .from('upcoming_releases')
                 .select('*, artists(*)')
                 .gte('release_date', new Date().toISOString().split('T')[0])
                 .order('release_date', { ascending: true })
+                .limit(5)
 
-            if (releasesError) {
-            } else {
-                setUpcomingReleases(releasesData || [])
-            }
-
+            setUpcomingReleases(releasesData || [])
             setTopNews(newsData || [])
         }
 
@@ -44,8 +40,8 @@ export function Sidebar() {
         <aside className={styles.sidebar}>
             <div className={styles.section}>
                 <div className={styles.section_header}>
-                    <i className={`bx bx-news ${styles.section_icon}`}></i>
                     <h3 className={styles.section_title}>{t('home.news.title')}</h3>
+                    <i className={`bx bx-news ${styles.section_icon}`}></i>
                 </div>
                 <div className={styles.section_content}>
                     {topNews.length > 0 ? (
@@ -62,7 +58,7 @@ export function Sidebar() {
                                                 style={{ objectFit: 'cover' }}
                                             />
                                         ) : (
-                                            <div className={styles.news_placeholder}>News</div>
+                                            <div className={styles.news_placeholder}>{t('nav.news')}</div>
                                         )}
                                     </div>
                                     <div className={styles.news_content}>
@@ -79,14 +75,14 @@ export function Sidebar() {
 
             <div className={styles.section}>
                 <div className={styles.section_header}>
-                    <i className={`bx bx-calendar-alt ${styles.section_icon}`}></i>
                     <h3 className={styles.section_title}>{t('category.Releases')}</h3>
+                    <i className={`bx bx-calendar-alt ${styles.section_icon}`}></i>
                 </div>
                 <div className={styles.section_content}>
                     {upcomingReleases.length > 0 ? (
                         upcomingReleases.map((release) => {
                             const releaseDate = new Date(release.release_date)
-                            const month = releaseDate.toLocaleDateString('en-US', { month: 'short' })
+                            const month = releaseDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: 'short' })
                             const day = releaseDate.getDate()
 
                             return (
@@ -108,7 +104,7 @@ export function Sidebar() {
                                     </div>
                                     <div className={styles.release_info}>
                                         <p className={styles.release_title}>{release.album_title}</p>
-                                        <p className={styles.release_artist}>{release.artists?.name || 'Unknown'}</p>
+                                        <p className={styles.release_artist}>{release.artists?.name || t('forum.sidebar.unknown')}</p>
                                     </div>
                                     <div className={styles.release_date_badge}>
                                         <span className={styles.release_month}>{month}</span>

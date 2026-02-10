@@ -41,8 +41,13 @@ interface NewsCardProps {
 export function NewsCard({ id, title, excerpt, image, date, category, author, commentsCount = 0, viewsCount = 0, onClick }: NewsCardProps) {
     const [ref, isCentered] = useOnScreenCenter({ threshold: 0.2, delay: 600 })
 
-    // Ensure category is always an array (for backward compatibility during migration)
-    const categories = Array.isArray(category) ? category : [category]
+    // Ensure category is always an array and filter out nulls/undefined
+    const categories = (Array.isArray(category) ? category : [category]).filter(Boolean);
+
+    // Provide default category if empty
+    if (categories.length === 0) {
+        categories.push('General');
+    }
 
     return (
         <div
@@ -66,6 +71,7 @@ export function NewsCard({ id, title, excerpt, image, date, category, author, co
                 )}
                 <div className={styles.categories_container}>
                     {categories.map((cat, index) => {
+                        if (!cat) return null;
                         const categoryColor = getCategoryColor(cat)
                         return (
                             <div

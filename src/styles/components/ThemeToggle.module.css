@@ -6,13 +6,14 @@
     justify-content: center;
     border-radius: var(--radius-md);
     background-color: transparent;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: background-color var(--transition-base);
+    transition: all var(--transition-base);
+    position: relative;
 }
 
 .toggle_btn:hover {
-    background-color: var(--color-accent);
+    border-color: var(--color-primary);
 }
 
 .toggle_btn:disabled {

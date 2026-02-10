@@ -68,25 +68,7 @@ export const commentSchema = z.object({
     content: commentContentSchema
 });
 
-export const contactSchema = z.object({
-    name: z.string()
-        .min(2, 'Name must be at least 2 characters')
-        .max(50, 'Name is too long')
-        .trim(),
-    email: emailSchema,
-    message: z.string()
-        .min(10, 'Message must be at least 10 characters')
-        .max(1000, 'Message is too long')
-        .trim()
-});
 
-// Helper types
-export type SignupFormData = z.infer<typeof signupSchema>;
-export type LoginFormData = z.infer<typeof loginSchema>;
-export type ProfileUpdateData = z.infer<typeof profileUpdateSchema>;
-export type PasswordChangeData = z.infer<typeof passwordChangeSchema>;
-export type CommentData = z.infer<typeof commentSchema>;
-export type ContactFormData = z.infer<typeof contactSchema>;
 
 // Helper function to format Zod errors
 export function formatZodErrors(error: ZodError): Record<string, string> {

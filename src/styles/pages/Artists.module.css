@@ -2,7 +2,7 @@
     position: relative;
     min-height: 100vh;
     overflow-x: hidden;
-    padding: 3rem 1.5rem 5rem;
+    padding: var(--spacing-12) var(--spacing-8) var(--spacing-20);
 }
 
 .filter_bar {
@@ -67,15 +67,10 @@
 .search_input:focus-visible,
 .filter_select:focus-visible,
 .toggle_button:focus-visible,
-.clear_button:focus-visible {
+.toggle_button:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1), var(--shadow-lg);
-}
-
-.toggle_button:active,
-.clear_button:active {
-    transform: scale(0.98);
 }
 
 .filter_select {
@@ -114,15 +109,16 @@
 }
 
 .toggle_button {
-    min-width: 44px;
+    min-width: 12rem;
     min-height: 44px;
-    padding: 0.75rem 1rem;
+    padding: 1rem 2rem 1rem 1rem;
     border-radius: var(--radius-full);
     border: 1px solid var(--color-input);
     background-color: var(--glass-inputs);
     backdrop-filter: blur(var(--blur-md));
     color: var(--color-muted-foreground);
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
     display: flex;
@@ -130,14 +126,7 @@
     justify-content: center;
     gap: 0.5rem;
     white-space: nowrap;
-    font-weight: 600;
     flex-shrink: 0;
-}
-
-.toggle_button:hover {
-    border-color: var(--color-primary);
-    color: var(--color-foreground);
-    box-shadow: var(--shadow-sm);
 }
 
 .toggle_button.active {
@@ -145,28 +134,7 @@
     color: var(--color-primary);
 }
 
-.clear_button {
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-full);
-    border: none;
-    background: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(0, 90%, 50%));
-    color: white;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 
-.clear_button:hover {
-    background: linear-gradient(135deg, hsl(0, 90%, 50%), hsl(0, 95%, 45%));
-    box-shadow: var(--shadow-lg);
-}
 
 /* Mobile Optimizations */
 @media (max-width: 1024px) {
@@ -210,8 +178,7 @@
         background-position: right 0.5rem center;
     }
 
-    .toggle_button,
-    .clear_button {
+    .toggle_button {
         padding: 0.875rem 1rem;
         font-size: var(--text-sm);
     }
@@ -231,14 +198,12 @@
     }
 
     .filter_select,
-    .toggle_button,
-    .clear_button {
+    .toggle_button {
         font-size: 0.875rem;
     }
 
     /* Ensure all buttons still meet 44px minimum */
-    .toggle_button,
-    .clear_button {
+    .toggle_button {
         min-height: 44px;
         min-width: 44px;
     }

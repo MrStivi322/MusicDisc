@@ -22,33 +22,37 @@ export default function Home() {
             {t('home.hero.title')}
           </h1>
 
-          <p className={styles.hero_subtitle}>
-            {t('home.hero.subtitle')}
-          </p>
-
-          <div className={styles.cta_container}>
-            <div className={styles.cta_card}>
-              <div className={styles.cta_icon}>
-                <i className="bx bx-search-alt"></i>
+          <div className={styles.functions_grid}>
+            <div className={styles.function_card}>
+              <div className={styles.function_icon}>
+                <i className="bx bx-scan-search"></i>
               </div>
-              <h3>{t('home.features.discover.title')}</h3>
-              <p>{t('home.features.discover.desc')}</p>
+              <h3>{t('home.function.search.title')}</h3>
+              <p>{t('home.function.search.desc')}</p>
             </div>
 
-            <div className={styles.cta_card}>
-              <div className={styles.cta_icon}>
-                <i className="bx bx-news"></i>
+            <div className={styles.function_card}>
+              <div className={styles.function_icon}>
+                <i className="bx bx-message-dots"></i>
               </div>
-              <h3>{t('home.features.news.title')}</h3>
-              <p>{t('home.features.news.desc')}</p>
+              <h3>{t('home.function.forum.title')}</h3>
+              <p>{t('home.function.forum.desc')}</p>
             </div>
 
-            <div className={styles.cta_card}>
-              <div className={styles.cta_icon}>
-                <i className="bx bx-play-circle"></i>
+            <div className={styles.function_card}>
+              <div className={styles.function_icon}>
+                <i className="bx bx-user-circle"></i>
               </div>
-              <h3>{t('home.features.listen.title')}</h3>
-              <p>{t('home.features.listen.desc')}</p>
+              <h3>{t('home.function.profile.title')}</h3>
+              <p>{t('home.function.profile.desc')}</p>
+            </div>
+
+            <div className={styles.function_card}>
+              <div className={styles.function_icon}>
+                <i className="bxl bx-spotify"></i>
+              </div>
+              <h3>{t('home.function.spotify.title')}</h3>
+              <p>{t('home.function.spotify.desc')}</p>
             </div>
           </div>
 
@@ -73,6 +77,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+
       </div>
     </main>
   )

@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import styles from "@/styles/pages/Auth.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { validate, loginSchema } from "@/lib/validation"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 
 function LoginForm() {
     const { t } = useLanguage()
@@ -53,7 +55,7 @@ function LoginForm() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.card}>
+            <div className={`card ${styles.card_override}`} style={{ maxWidth: '450px', width: '100%', padding: '2rem' }}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>{t('auth.login.title')}</h2>
                     <p className={styles.subtitle}>
@@ -65,10 +67,8 @@ function LoginForm() {
                 </div>
                 <form className={styles.form} onSubmit={handleLogin}>
                     <div className={styles.field}>
-                        <label htmlFor="email-address" className={styles.label}>
-                            {t('auth.form.email')}
-                        </label>
-                        <input
+                        <Input
+                            label={t('auth.form.email')}
                             id="email-address"
                             name="email"
                             type="email"
@@ -76,16 +76,13 @@ function LoginForm() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className={styles.input}
                             placeholder="email@example.com"
                         />
                     </div>
                     <div className={styles.field}>
-                        <label htmlFor="password" className={styles.label}>
-                            {t('auth.form.password')}
-                        </label>
-                        <div className={styles.password_field}>
-                            <input
+                        <div style={{ position: 'relative' }}>
+                            <Input
+                                label={t('auth.form.password')}
                                 id="password"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
@@ -93,13 +90,20 @@ function LoginForm() {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className={styles.input}
                                 placeholder="••••••••"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className={styles.password_toggle}
+                                style={{
+                                    position: 'absolute',
+                                    right: '12px',
+                                    top: '38px',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--color-muted-foreground)',
+                                    cursor: 'pointer'
+                                }}
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 {showPassword ? <i className='bx bx-eye'></i> : <i className='bx bx-eye-slash'></i>}
@@ -119,13 +123,15 @@ function LoginForm() {
                         </div>
                     )}
 
-                    <button
+                    <Button
                         type="submit"
                         disabled={loading}
-                        className={styles.button}
+                        variant="primary"
+                        isLoading={loading}
+                        style={{ width: '100%', marginTop: '1rem' }}
                     >
                         {loading ? t('auth.login.signing_in') : t('auth.login.button')}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

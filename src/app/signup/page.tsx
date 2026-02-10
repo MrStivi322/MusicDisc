@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import styles from "@/styles/pages/Auth.module.css"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { validate, signupSchema } from "@/lib/validation"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 
 export default function SignupPage() {
     const { t } = useLanguage()
@@ -67,7 +69,7 @@ export default function SignupPage() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.card}>
+            <div className={`card ${styles.card_override}`} style={{ maxWidth: '450px', width: '100%', padding: '2rem' }}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>{t('auth.signup.title')}</h2>
                     <p className={styles.subtitle}>
@@ -83,29 +85,22 @@ export default function SignupPage() {
                     )}
 
                     <div className={styles.field}>
-                        <label htmlFor="username" className={styles.label}>
-                            {t('auth.form.username')}
-                        </label>
-                        <input
+                        <Input
+                            label={t('auth.form.username')}
                             id="username"
                             name="username"
                             type="text"
                             required
                             value={formData.username}
                             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            className={styles.input}
                             placeholder="johndoe"
+                            error={errors.username}
                         />
-                        {errors.username && (
-                            <span className={styles.field_error}>{errors.username}</span>
-                        )}
                     </div>
 
                     <div className={styles.field}>
-                        <label htmlFor="email-address" className={styles.label}>
-                            {t('auth.form.email')}
-                        </label>
-                        <input
+                        <Input
+                            label={t('auth.form.email')}
                             id="email-address"
                             name="email"
                             type="email"
@@ -113,20 +108,15 @@ export default function SignupPage() {
                             required
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className={styles.input}
                             placeholder="you@example.com"
+                            error={errors.email}
                         />
-                        {errors.email && (
-                            <span className={styles.field_error}>{errors.email}</span>
-                        )}
                     </div>
 
                     <div className={styles.field}>
-                        <label htmlFor="password" className={styles.label}>
-                            {t('auth.form.password')}
-                        </label>
-                        <div className={styles.password_field}>
-                            <input
+                        <div style={{ position: 'relative' }}>
+                            <Input
+                                label={t('auth.form.password')}
                                 id="password"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
@@ -134,28 +124,31 @@ export default function SignupPage() {
                                 required
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                className={styles.input}
                                 placeholder="••••••••"
+                                error={errors.password}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className={styles.password_toggle}
+                                style={{
+                                    position: 'absolute',
+                                    right: '12px',
+                                    top: '38px',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--color-muted-foreground)',
+                                    cursor: 'pointer'
+                                }}
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 {showPassword ? <i className='bx bx-hide'></i> : <i className='bx bx-show'></i>}
                             </button>
                         </div>
-                        {errors.password && (
-                            <span className={styles.field_error}>{errors.password}</span>
-                        )}
                     </div>
 
                     <div className={styles.field}>
-                        <label htmlFor="confirm-password" className={styles.label}>
-                            {t('auth.form.confirm_password')}
-                        </label>
-                        <input
+                        <Input
+                            label={t('auth.form.confirm_password')}
                             id="confirm-password"
                             name="confirmPassword"
                             type="password"
@@ -163,21 +156,21 @@ export default function SignupPage() {
                             required
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            className={styles.input}
                             placeholder="••••••••"
+                            error={errors.confirmPassword}
                         />
-                        {errors.confirmPassword && (
-                            <span className={styles.field_error}>{errors.confirmPassword}</span>
-                        )}
                     </div>
 
-                    <button
+                    <Button
                         type="submit"
-                        className={styles.submit_button}
+                        className={styles.submit_button} // keeping logic class if needed, or replace
+                        style={{ width: '100%', marginTop: '1rem' }}
                         disabled={loading}
+                        variant="primary"
+                        isLoading={loading}
                     >
                         {loading ? t('auth.signup.creating') : t('auth.signup.button')}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

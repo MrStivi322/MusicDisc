@@ -1,7 +1,7 @@
 import styles from "@/styles/components/SkeletonLoader.module.css"
 
 interface SkeletonCardProps {
-    variant?: 'artist' | 'news'
+    variant?: 'artist'
     count?: number
 }
 
@@ -11,23 +11,9 @@ export function SkeletonCard({ variant = 'artist', count = 6 }: SkeletonCardProp
             {Array.from({ length: count }).map((_, index) => (
                 <div key={index} className={`${styles.skeleton_card} ${styles[variant]}`}>
                     <div className={styles.skeleton_image}></div>
-
-                    {variant === 'artist' ? (
-                        <div className={styles.skeleton_content}>
-                            <div className={styles.skeleton_text} style={{ width: '70%' }}></div>
-                        </div>
-                    ) : (
-                        <div className={styles.skeleton_content}>
-                            <div className={styles.skeleton_text} style={{ width: '40%', height: '12px' }}></div>
-                            <div className={styles.skeleton_text} style={{ width: '90%', height: '20px', marginTop: '8px' }}></div>
-                            <div className={styles.skeleton_text} style={{ width: '100%', height: '14px', marginTop: '8px' }}></div>
-                            <div className={styles.skeleton_text} style={{ width: '85%', height: '14px', marginTop: '4px' }}></div>
-                            <div className={styles.skeleton_footer}>
-                                <div className={styles.skeleton_text} style={{ width: '100px', height: '14px' }}></div>
-                                <div className={styles.skeleton_text} style={{ width: '80px', height: '14px' }}></div>
-                            </div>
-                        </div>
-                    )}
+                    <div className={styles.skeleton_content}>
+                        <div className={styles.skeleton_text} style={{ width: '70%' }}></div>
+                    </div>
                 </div>
             ))}
         </>
