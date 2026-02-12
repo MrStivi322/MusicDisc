@@ -371,10 +371,9 @@ export default function SettingsPage() {
                     <div className="card animate-entrance">
                         <div className="card-body">
                             <div className={styles.section_header}>
-                                <i className={`bx bx-globe ${styles.section_icon}`}></i>
+                                <i className={`bx bx-translate ${styles.section_icon}`}></i>
                                 <div>
                                     <h2 className={styles.section_title}>{t('settings.language')}</h2>
-                                    <p className={styles.section_desc}>{t('settings.language.desc')}</p>
                                 </div>
                             </div>
 
@@ -403,7 +402,6 @@ export default function SettingsPage() {
                                 <i className={`bx bx-palette ${styles.section_icon}`}></i>
                                 <div>
                                     <h2 className={styles.section_title}>{t('settings.appearance')}</h2>
-                                    <p className={styles.section_desc}>{t('settings.appearance.desc')}</p>
                                 </div>
                             </div>
 
@@ -763,28 +761,21 @@ export default function SettingsPage() {
                                             <i className={`bx bx-file-detail ${styles.section_icon}`}></i>
                                             <div>
                                                 <h2 className={styles.section_title}>{t('settings.account')}</h2>
-                                                <p className={styles.section_desc}>{t('settings.account.desc')}</p>
                                             </div>
                                         </div>
 
-                                        <div className={styles.stats_grid}>
-                                            <div className={styles.stat_card}>
-                                                <i className='bx bx-calendar-check'></i>
-                                                <div className={styles.stat_info}>
-                                                    <div className={styles.stat_label}>{t('settings.account.created')}</div>
-                                                    <div className={styles.stat_value}>
-                                                        {new Date(user.created_at).toLocaleDateString()}
-                                                    </div>
+                                        <div className={styles.info_display}>
+                                            <div className={styles.info_item}>
+                                                <div className={styles.info_label}>{t('settings.account.created')}</div>
+                                                <div className={styles.info_value}>
+                                                    {new Date(user.created_at).toLocaleDateString()}
                                                 </div>
                                             </div>
 
-                                            <div className={styles.stat_card}>
-                                                <i className='bx bx-history'></i>
-                                                <div className={styles.stat_info}>
-                                                    <div className={styles.stat_label}>{t('settings.account.last_login')}</div>
-                                                    <div className={styles.stat_value}>
-                                                        {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '-'}
-                                                    </div>
+                                            <div className={styles.info_item}>
+                                                <div className={styles.info_label}>{t('settings.account.last_login')}</div>
+                                                <div className={styles.info_value}>
+                                                    {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -797,23 +788,21 @@ export default function SettingsPage() {
                                             <i className={`bxl bx-spotify ${styles.section_icon} ${styles.spotify_icon}`}></i>
                                             <div>
                                                 <h2 className={styles.section_title}>{t('spotify.title')}</h2>
-                                                <p className={styles.section_desc}>{t('spotify.desc')}</p>
                                             </div>
                                         </div>
 
-                                        <div className={styles.integration_content}>
-                                            <div className={styles.integration_info}>
-                                                <h4>
+                                        <div className={styles.info_display}>
+                                            <div className={styles.info_item}>
+                                                <div className={styles.info_label}>
                                                     {token ? t('spotify.connected_as') : t('spotify.not_connected')}
-                                                </h4>
-                                                <p className={styles.section_desc}>
+                                                </div>
+                                                <div className={styles.info_value}>
                                                     {token ? t('spotify.enjoy_music') : t('spotify.connect_desc')}
-                                                </p>
+                                                </div>
                                             </div>
                                             <Button
                                                 onClick={token ? logout : login}
                                                 variant={token ? "outline" : "primary"}
-                                                leftIcon={<i className={`bx ${token ? 'bx-log-out' : 'bxl-spotify'}`}></i>}
                                                 className={!token ? styles.spotify_button : ""}
                                             >
                                                 {token ? t('spotify.disconnect') : t('spotify.connect')}

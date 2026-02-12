@@ -142,14 +142,24 @@
 }
 
 /* Responsive Adjustments */
+
+@media (max-width: 1024px) {
+    .content_section_container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar_card {
+        position: static;
+    }
+}
+
 @media (max-width: 768px) {
     .main {
-        padding: var(--spacing-4) var(--spacing-4) var(--spacing-10);
+        padding: 1rem;
     }
 
     .meta_section {
-        padding: var(--spacing-6);
-        gap: var(--spacing-4);
+        padding: var(--spacing-2) var(--spacing-4);
     }
 
     .title {
@@ -157,7 +167,7 @@
     }
 
     .content_section {
-        padding: var(--spacing-6);
+        padding: var(--spacing-2) var(--spacing-4);
     }
 
     .article_content {

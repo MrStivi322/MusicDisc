@@ -34,6 +34,40 @@ function calculateTotalPlays(songs: Song[] | null): string {
 
 
 
+const CollapsibleSection = ({
+    title,
+    icon,
+    children,
+    className,
+    defaultOpen = true
+}: {
+    title: string,
+    icon: string,
+    children: React.ReactNode,
+    className?: string,
+    defaultOpen?: boolean
+}) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen)
+
+    return (
+        <div className={className}>
+            <div
+                className={`${styles.section_header} ${isOpen ? styles.open : ''}`}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <h2 className={styles.section_title}>{title}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <i className={`${icon} ${styles.section_icon}`}></i>
+                    <i className={`bx bx-chevron-down ${styles.dropdown_chevron} ${isOpen ? styles.rotate : ''}`}></i>
+                </div>
+            </div>
+            <div className={`${styles.collapsible_content} ${isOpen ? styles.open : ''}`}>
+                {children}
+            </div>
+        </div>
+    )
+}
+
 export default function ArtistDetailClient({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter()
     const { id } = useParams()
@@ -143,18 +177,18 @@ export default function ArtistDetailClient({ params }: { params: Promise<{ id: s
                 </nav>
 
                 <div className="navigation_header">
-                    <button onClick={handleBack} className="back_button ripple" aria-label="Back to artists results">
+                    <button onClick={handleBack} className="back_button ripple" aria-label={t('artist.back_to_results')}>
                         <i className='bx bx-arrow-to-left'></i>
-                        Back to Results
+                        {t('artist.back_to_results')}
                     </button>
 
                     {lastFilters && (
                         <div className={styles.filter_context}>
-                            <span className={styles.filter_context_label}>Returned from:</span>
-                            {lastFilters.genre !== "All" && <span className={styles.filter_tag}>Genre: {lastFilters.genre}</span>}
-                            {lastFilters.sort === 'name' && <span className={styles.filter_tag}>Order: A-Z</span>}
-                            {lastFilters.sort === 'newest' && <span className={styles.filter_tag}>Order: Newest</span>}
-                            {lastFilters.sort === 'followers' && <span className={styles.filter_tag}>Order: Popular</span>}
+                            <span className={styles.filter_context_label}>{t('artist.returned_from')}</span>
+                            {lastFilters.genre !== "All" && <span className={styles.filter_tag}>{t('artist.filter.genre')} {lastFilters.genre}</span>}
+                            {lastFilters.sort === 'name' && <span className={styles.filter_tag}>{t('artist.filter.order')} {t('artist.order.az')}</span>}
+                            {lastFilters.sort === 'newest' && <span className={styles.filter_tag}>{t('artist.filter.order')} {t('artist.order.newest')}</span>}
+                            {lastFilters.sort === 'followers' && <span className={styles.filter_tag}>{t('artist.filter.order')} {t('artist.order.popular')}</span>}
                         </div>
                     )}
                 </div>
@@ -194,24 +228,24 @@ export default function ArtistDetailClient({ params }: { params: Promise<{ id: s
             <div className={styles.content_grid}>
                 <div className={styles.main_content}>
                     {sanitizedDescription && (
-                        <section className={styles.section}>
-                            <div className={styles.section_header}>
-                                <h2 className={styles.section_title}>{t('artist.about')}</h2>
-                                <i className={`bx bx-info-circle ${styles.section_icon}`}></i>
-                            </div>
+                        <CollapsibleSection
+                            title={t('artist.about')}
+                            icon="bx bx-info-circle"
+                            className={styles.section}
+                        >
                             <div
                                 className={styles.description}
                                 dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
                             />
-                        </section>
+                        </CollapsibleSection>
                     )}
 
                     {albums && albums.length > 0 && (
-                        <section className={styles.section}>
-                            <div className={styles.section_header}>
-                                <h2 className={styles.section_title}>{t('artist.albums')}</h2>
-                                <i className={`bx bx-album-covers ${styles.section_icon}`}></i>
-                            </div>
+                        <CollapsibleSection
+                            title={t('artist.albums')}
+                            icon="bx bx-album-covers"
+                            className={styles.section}
+                        >
                             <div className={styles.albums_grid}>
                                 {albums.map((album) => (
                                     <div key={album.id} className={styles.album_card}>
@@ -233,46 +267,46 @@ export default function ArtistDetailClient({ params }: { params: Promise<{ id: s
                                     </div>
                                 ))}
                             </div>
-                        </section>
+                        </CollapsibleSection>
                     )}
                 </div>
 
                 <aside className={styles.sidebar}>
-                    <div className={styles.stats_card}>
-                        <div className={styles.section_header}>
-                            <h2 className={styles.section_title}>{t('artist.stats')}</h2>
-                            <i className={`bx bx-microphone-alt-2 ${styles.section_icon}`}></i>
-                        </div>
+                    <CollapsibleSection
+                        title={t('artist.stats')}
+                        icon="bx bx-microphone-alt-2"
+                        className={styles.stats_card}
+                    >
                         <div className={styles.stats_grid}>
-                            <div className={styles.stat_item} title="Musical genre classification">
-                                <span className={styles.stat_label}>Genre</span>
+                            <div className={styles.stat_item}>
+                                <span className={styles.stat_label}>{t('artist.stats.genre')}</span>
                                 <span className={styles.stat_value}>{artist.genre}</span>
                             </div>
-                            <div className={styles.stat_item} title="Total number of people following this artist">
-                                <span className={styles.stat_label}>Followers</span>
+                            <div className={styles.stat_item}>
+                                <span className={styles.stat_label}>{t('artist.stats.followers')}</span>
                                 <span className={styles.stat_value}>{formatNumber(artist.followers_count)}</span>
                             </div>
-                            <div className={styles.stat_item} title="Number of tracks in our database">
-                                <span className={styles.stat_label}>Songs</span>
+                            <div className={styles.stat_item}>
+                                <span className={styles.stat_label}>{t('artist.stats.songs')}</span>
                                 <span className={styles.stat_value}>{songs?.length || 0}</span>
                             </div>
-                            <div className={styles.stat_item} title="Number of albums released">
-                                <span className={styles.stat_label}>Albums</span>
+                            <div className={styles.stat_item}>
+                                <span className={styles.stat_label}>{t('artist.stats.albums')}</span>
                                 <span className={styles.stat_value}>{albums?.length || 0}</span>
                             </div>
-                            <div className={styles.stat_item} title="Combined plays across all songs">
-                                <span className={styles.stat_label}>Total Plays</span>
+                            <div className={styles.stat_item}>
+                                <span className={styles.stat_label}>{t('artist.stats.total_plays')}</span>
                                 <span className={styles.stat_value}>{calculateTotalPlays(songs)}</span>
                             </div>
                         </div>
-                    </div>
+                    </CollapsibleSection>
 
                     {songs && songs.length > 0 && (
-                        <div className={styles.stats_card}>
-                            <div className={styles.section_header}>
-                                <h2 className={styles.section_title}>{t('artist.top_songs')}</h2>
-                                <i className={`bx bx-music ${styles.section_icon}`}></i>
-                            </div>
+                        <CollapsibleSection
+                            title={t('artist.top_songs')}
+                            icon="bx bx-music"
+                            className={styles.stats_card}
+                        >
                             <div className={styles.sidebar_songs_list}>
                                 {songs.map((song, index) => (
                                     <div key={song.id} className={styles.sidebar_song_item}>
@@ -287,10 +321,9 @@ export default function ArtistDetailClient({ params }: { params: Promise<{ id: s
                                                         login()
                                                     }
                                                 }}
-                                                title={token ? (t('artist.play') || "Play") : (t('spotify.connect_to_play') || "Connect to Spotify to Play")}
                                                 aria-label={token ? "Play track" : "Connect to Spotify"}
                                             >
-                                                <i className={`${token ? 'bx bx-play' : 'bxl bx-spotify'}`} style={{ fontSize: '2rem' }}></i>
+                                                <i className={`${token ? 'bx bx-play' : 'bxl bx-spotify'}`}></i>
                                             </button>
 
                                             <div className={styles.song_info}>
@@ -303,7 +336,7 @@ export default function ArtistDetailClient({ params }: { params: Promise<{ id: s
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </CollapsibleSection>
                     )}
                 </aside>
             </div>

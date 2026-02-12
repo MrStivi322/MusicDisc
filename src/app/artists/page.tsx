@@ -146,7 +146,7 @@ function ArtistsContent() {
                 />
 
                 <FilterBar>
-                    <div className="flex-grow-1" style={{ minWidth: '250px', flex: '1 1 300px' }}>
+                    <div className="flex-grow-1">
                         <Input
                             placeholder={t('artists.search_placeholder')}
                             value={searchQuery}
@@ -162,7 +162,7 @@ function ArtistsContent() {
                         style={{ minWidth: '180px' }}
                         aria-label="Filter by genre"
                     >
-                        <option value="All">All Genres</option>
+                        <option value="All">{t('artist.all_genres')}</option>
                         {genres.filter(g => g !== "All").map((genre) => (
                             <option key={genre} value={genre}>
                                 {t(`genre.${genre}`) === `genre.${genre}` ? genre : t(`genre.${genre}`)}
@@ -176,9 +176,9 @@ function ArtistsContent() {
                         style={{ minWidth: '160px' }}
                         aria-label="Sort artists"
                     >
-                        <option value="followers">Most Popular</option>
-                        <option value="name">Name (A-Z)</option>
-                        <option value="newest">Newest</option>
+                        <option value="followers">{t('artists.sort.popular')}</option>
+                        <option value="name">{t('artists.sort.name')}</option>
+                        <option value="newest">{t('artists.sort.recent')}</option>
                     </Select>
 
                     <Button
@@ -243,7 +243,7 @@ function ArtistsContent() {
                                 size="lg"
                                 variant="primary"
                             >
-                                {isLoadingMore ? 'Loading...' : 'Load More'}
+                                {isLoadingMore ? t('artists.loading_more') : t('artists.load_more')}
                             </Button>
                         </div>
                     )}

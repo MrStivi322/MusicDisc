@@ -60,9 +60,9 @@ export default function NewsDetailClient({ params }: { params: Promise<{ id: str
     return (
         <main className={styles.main}>
             <nav className="breadcrumbs" aria-label="Breadcrumb">
-                <Link href="/" className="breadcrumb_link">Home</Link>
+                <Link href="/" className="breadcrumb_link">{t('nav.home')}</Link>
                 <span className="breadcrumb_separator">/</span>
-                <Link href="/forum" className="breadcrumb_link">Forum</Link>
+                <Link href="/forum" className="breadcrumb_link">{t('nav.forum')}</Link>
                 <span className="breadcrumb_separator">/</span>
                 <span className="breadcrumb_current">{article.title}</span>
             </nav>
@@ -70,7 +70,7 @@ export default function NewsDetailClient({ params }: { params: Promise<{ id: str
             <div className="navigation_header">
                 <button onClick={handleBack} className="back_button ripple">
                     <i className='bx bx-arrow-to-left'></i>
-                    Back to Forum
+                    {t('news.back_to_forum')}
                 </button>
             </div>
 

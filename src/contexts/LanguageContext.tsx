@@ -102,6 +102,7 @@ const translations = {
         'common.home': 'Home',
         'common.community': 'Community',
         'common.me': 'Me',
+        'common.filters': 'Filters',
 
         // Errors
         'error.unknown': 'An unknown error occurred',
@@ -229,7 +230,40 @@ const translations = {
         'artist.plays': 'plays',
         'artist.not_found': 'Artist not found',
         'artist.stats': 'Artist Stats',
+        'artist.stats.genre': 'Genre',
+        'artist.stats.followers': 'Followers',
+        'artist.stats.songs': 'Songs',
+        'artist.stats.albums': 'Albums',
+        'artist.stats.total_plays': 'Total Plays',
+        'artist.stats.genre_desc': 'Musical genre classification',
+        'artist.stats.followers_desc': 'Total number of people following this artist',
+        'artist.stats.songs_desc': 'Number of tracks in our database',
+        'artist.stats.albums_desc': 'Number of albums released',
+        'artist.stats.total_plays_desc': 'Combined plays across all songs',
         'artist.now_playing': 'Now Playing',
+        'artist.back_to_results': 'Back to Results',
+        'artist.returned_from': 'Returned from:',
+        'artist.filter.genre': 'Genre:',
+        'artist.filter.order': 'Order:',
+        'artist.order.az': 'A-Z',
+        'artist.order.newest': 'Newest',
+        'artist.order.popular': 'Popular',
+        'artist.all_genres': 'All Genres',
+        'artists.sort.popular': 'Most Popular',
+        'artists.sort.name': 'Name (A-Z)',
+        'artists.sort.recent': 'Most Recent',
+        'artists.load_more': 'Load More',
+        'artists.loading_more': 'Loading...',
+
+        // News detail
+        'news.back_to_forum': 'Back to Forum',
+
+        // Legal / Restricted
+        'legal.restricted_title': 'Restricted Access',
+        'legal.not_available_title': 'Content Not Available',
+        'legal.privacy_restricted_msg': 'This section has been temporarily disabled due to updates in the legal compliance framework. Please try again later.',
+        'legal.terms_restricted_msg': 'The Terms of Service are currently under technical and legal review. We apologize for the inconvenience, this section will be available soon.',
+        'legal.back_home': 'Back to Home',
 
         // Home
         'home.hero.badge': 'Discover New Music',
@@ -393,6 +427,7 @@ const translations = {
         'common.home': 'Inicio',
         'common.community': 'Comunidad',
         'common.me': 'Yo',
+        'common.filters': 'Filtros',
 
         // Errors
         'error.unknown': 'Ocurrió un error desconocido',
@@ -519,7 +554,40 @@ const translations = {
         'artist.plays': 'reproducciones',
         'artist.not_found': 'Artista no encontrado',
         'artist.stats': 'Estadísticas del Artista',
+        'artist.stats.genre': 'Género',
+        'artist.stats.followers': 'Seguidores',
+        'artist.stats.songs': 'Canciones',
+        'artist.stats.albums': 'Álbumes',
+        'artist.stats.total_plays': 'Reproducciones',
+        'artist.stats.genre_desc': 'Clasificación del género musical',
+        'artist.stats.followers_desc': 'Número total de personas siguiendo a este artista',
+        'artist.stats.songs_desc': 'Número de pistas en nuestra base de datos',
+        'artist.stats.albums_desc': 'Número de álbumes lanzados',
+        'artist.stats.total_plays_desc': 'Reproducciones combinadas de todas las canciones',
         'artist.now_playing': 'Reproduciendo Ahora',
+        'artist.back_to_results': 'Volver a resultados',
+        'artist.returned_from': 'Volviste de:',
+        'artist.filter.genre': 'Género:',
+        'artist.filter.order': 'Orden:',
+        'artist.order.az': 'A-Z',
+        'artist.order.newest': 'Reciente',
+        'artist.order.popular': 'Popular',
+        'artist.all_genres': 'Todos los Géneros',
+        'artists.sort.popular': 'Más Popular',
+        'artists.sort.name': 'Nombre (A-Z)',
+        'artists.sort.recent': 'Más Reciente',
+        'artists.load_more': 'Cargar Más',
+        'artists.loading_more': 'Cargando...',
+
+        // News detail
+        'news.back_to_forum': 'Volver al Foro',
+
+        // Legal / Restricted
+        'legal.restricted_title': 'Acceso Restringido',
+        'legal.not_available_title': 'Contenido No Disponible',
+        'legal.privacy_restricted_msg': 'Esta sección ha sido deshabilitada temporalmente por actualizaciones en el marco de cumplimiento legal. Por favor, vuelve a intentarlo más tarde.',
+        'legal.terms_restricted_msg': 'Los Términos de Servicio se encuentran en revisión técnica y legal. Lamentamos los inconvenientes, esta sección estará disponible próximamente.',
+        'legal.back_home': 'Volver al Inicio',
 
         // Home
         'home.hero.badge': 'Descubre Nueva Música',

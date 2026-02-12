@@ -137,23 +137,9 @@
 
 
 /* Mobile Optimizations */
-@media (max-width: 1024px) {
-    .filter_bar {
-        gap: 1rem 0.75rem;
-    }
-
-    .search_container {
-        flex-basis: 100%;
-    }
-
-    .filter_select {
-        flex-grow: 1;
-    }
-}
-
 @media (max-width: 768px) {
     .main {
-        padding: 2rem 1rem 3rem;
+        padding: 1rem;
     }
 
     .filter_bar {
@@ -186,7 +172,7 @@
 
 @media (max-width: 480px) {
     .main {
-        padding: 1.5rem 0.75rem 2.5rem;
+        padding: 1rem;
     }
 
     .filter_bar {
@@ -202,7 +188,6 @@
         font-size: 0.875rem;
     }
 
-    /* Ensure all buttons still meet 44px minimum */
     .toggle_button {
         min-height: 44px;
         min-width: 44px;

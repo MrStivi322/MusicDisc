@@ -123,7 +123,7 @@ function ForumPageContent() {
                 />
 
                 <FilterBar>
-                    <div className="flex-grow-1" style={{ minWidth: '250px', flex: '1 1 300px' }}>
+                    <div className="flex-grow-1">
                         <Input
                             placeholder={t('forum.search.placeholder')}
                             value={searchQuery}

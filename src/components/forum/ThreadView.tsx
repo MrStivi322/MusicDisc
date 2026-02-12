@@ -12,6 +12,7 @@ import { ForumService } from '@/services/ForumService'
 import { useAuth } from '@/components/AuthProvider'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Modal } from '@/components/Modal'
+import { ZoomableImage } from '@/components/ui/ZoomableImage'
 
 interface ThreadViewProps {
     thread: ForumThread
@@ -187,16 +188,10 @@ export function ThreadView({ thread, comments }: ThreadViewProps) {
 
                                         {/* Full size image modal */}
                                         <Modal isOpen={showImageModal} onClose={() => setShowImageModal(false)} title={t('forum.thread.image_attached')}>
-                                            <div className={styles.modal_image_container}>
-                                                <Image
-                                                    src={thread.media_url}
-                                                    alt={t('forum.thread.media_fullscreen')}
-                                                    width={1920}
-                                                    height={1080}
-                                                    className={styles.modal_image}
-                                                    style={{ objectFit: 'contain', width: '100%', height: 'auto', maxHeight: '85vh' }}
-                                                />
-                                            </div>
+                                            <ZoomableImage
+                                                src={thread.media_url}
+                                                alt={t('forum.thread.media_fullscreen')}
+                                            />
                                         </Modal>
                                     </>
                                 ) : (

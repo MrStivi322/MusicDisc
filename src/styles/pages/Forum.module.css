@@ -91,22 +91,6 @@
     align-items: start;
 }
 
-@media (max-width: 768px) {
-    .main {
-        padding: 2rem 1rem 3rem;
-    }
-
-    .content_grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .main {
-        padding: 1.5rem 0.75rem 2.5rem;
-    }
-}
-
 .feed {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
@@ -240,8 +224,11 @@
 }
 
 @media (max-width: 768px) {
-    .search_container {
-        width: 100%;
-        min-width: auto;
+    .main {
+        padding: 1rem;
+    }
+
+    .content_grid {
+        grid-template-columns: 1fr;
     }
 }
