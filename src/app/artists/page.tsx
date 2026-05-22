@@ -1,17 +1,14 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import useSWRInfinite from "swr/infinite"
-import { ArtistCard } from "@/components/ArtistCard"
-import { SkeletonCard } from "@/components/SkeletonLoader"
+import { ArtistCard } from "@/app/artists/[id]/ArtistCard"
 import { supabase, fetchGenresWithCache } from "@/lib/supabase"
 import type { Artist } from "@/lib/database.types"
-import styles from "@/styles/pages/Artists.module.css"
-import { useLanguage } from "@/contexts/LanguageContext"
-import { useDebounce } from "@/hooks/useDebounce"
+import styles from "@/styles/Artists/Artists.module.css"
 
-// New Standard Components
+import { useDebounce } from "@/hooks/useDebounce"
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { FilterBar } from '@/components/ui/FilterBar'
 import { Button } from '@/components/ui/Button'
@@ -23,7 +20,7 @@ export const dynamic = 'force-dynamic'
 const ITEMS_PER_PAGE = 12;
 
 function ArtistsContent() {
-    const { t } = useLanguage()
+
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -37,7 +34,6 @@ function ArtistsContent() {
 
     const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
-    // SWR Fetcher
     const fetchArtists = async ([key, pageIndex, query, genre, top, sort]: [string, number, string, string, boolean, string]) => {
         const from = pageIndex * ITEMS_PER_PAGE
         const to = from + ITEMS_PER_PAGE - 1
@@ -56,7 +52,7 @@ function ArtistsContent() {
         }
 
         if (genre !== "All") {
-            queryBuilder = queryBuilder.eq('genre', genre)
+            queryBuilder = queryBuilder.ilike('genre', `%"${genre}"%`)
         }
 
         if (top) {
@@ -73,7 +69,6 @@ function ArtistsContent() {
         return { data: data || [], count: count || 0 }
     }
 
-    // SWR Key
     const getKey = (pageIndex: number, previousPageData: { data: Artist[], count: number } | null) => {
         if (previousPageData && !previousPageData.data.length) return null // reached the end
         return ['artists', pageIndex, debouncedSearchQuery, selectedGenre, showTopOnly, sortBy]
@@ -91,11 +86,15 @@ function ArtistsContent() {
     const isEmpty = data?.[0]?.data.length === 0;
     const isReachingEnd = isEmpty || (data && data[data.length - 1]?.data.length < ITEMS_PER_PAGE);
 
+    const loadGenres = useCallback(async () => {
+        const genresList = await fetchGenresWithCache()
+        setGenres(genresList)
+    }, [])
+
     useEffect(() => {
         setMounted(true)
         loadGenres()
 
-        // Read search params after mount
         const q = searchParams.get('q')
         const genre = searchParams.get('genre')
         const top = searchParams.get('top')
@@ -106,17 +105,16 @@ function ArtistsContent() {
         if (top === 'true') setShowTopOnly(true)
         if (sort) setSortBy(sort as 'followers' | 'name' | 'newest')
 
-        // Scroll restoration
         const savedScroll = sessionStorage.getItem('artists_scroll_y')
         if (savedScroll) {
             window.scrollTo(0, parseInt(savedScroll))
             sessionStorage.removeItem('artists_scroll_y')
         }
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loadGenres])
 
-    // Update URL when filters change
     useEffect(() => {
-        if (!mounted) return // Only run on client side
+        if (!mounted) return
 
         const params = new URLSearchParams()
         if (debouncedSearchQuery) params.set('q', debouncedSearchQuery)
@@ -127,32 +125,23 @@ function ArtistsContent() {
         router.replace(`/artists?${params.toString()}`, { scroll: false })
     }, [debouncedSearchQuery, selectedGenre, showTopOnly, sortBy, router, mounted])
 
-    async function loadGenres() {
-        const genresList = await fetchGenresWithCache()
-        setGenres(genresList)
-    }
-
-    function handleLoadMore() {
-        setSize(size + 1)
-    }
+    const handleLoadMore = useCallback(() => {
+        setSize(s => s + 1)
+    }, [setSize])
 
 
     return (
         <div className="page-container">
             <div className={mounted ? 'animate-fade-in' : ''}>
-                <SectionHeader
-                    title={t('artists.title')}
-                    subtitle={t('artists.subtitle')}
-                />
+                <SectionHeader title="Descubre nuevos artistas" />
 
                 <FilterBar>
                     <div className="flex-grow-1">
                         <Input
-                            placeholder={t('artists.search_placeholder')}
+                            placeholder="Buscar artistas"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            icon="bx-search"
-                            aria-label="Search artists by name"
+                            icon="bx bx-search bx-remove-padding"
                         />
                     </div>
 
@@ -160,12 +149,11 @@ function ArtistsContent() {
                         value={selectedGenre}
                         onChange={(e) => setSelectedGenre(e.target.value)}
                         style={{ minWidth: '180px' }}
-                        aria-label="Filter by genre"
                     >
-                        <option value="All">{t('artist.all_genres')}</option>
+                        <option value="All">Todos los géneros</option>
                         {genres.filter(g => g !== "All").map((genre) => (
                             <option key={genre} value={genre}>
-                                {t(`genre.${genre}`) === `genre.${genre}` ? genre : t(`genre.${genre}`)}
+                                {genre}
                             </option>
                         ))}
                     </Select>
@@ -174,43 +162,38 @@ function ArtistsContent() {
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'followers' | 'name' | 'newest')}
                         style={{ minWidth: '160px' }}
-                        aria-label="Sort artists"
                     >
-                        <option value="followers">{t('artists.sort.popular')}</option>
-                        <option value="name">{t('artists.sort.name')}</option>
-                        <option value="newest">{t('artists.sort.recent')}</option>
+                        <option value="followers">Popular</option>
+                        <option value="name">Nombre</option>
+                        <option value="newest">Reciente</option>
                     </Select>
 
                     <Button
                         variant={showTopOnly ? 'primary' : 'outline'}
                         onClick={() => setShowTopOnly(!showTopOnly)}
-                        leftIcon={<i className='bx bxs-hot'></i>}
-                        title={t('artists.show_top')}
+                        leftIcon={<i className='bxf bx-hot bx-remove-padding'></i>}
                     >
-                        {t('artists.show_top')}
+                        Artistas destacados
                     </Button>
                 </FilterBar>
             </div>
 
             {isLoading ? (
-                <div className="content-grid">
-                    <SkeletonCard variant="artist" count={12} />
-                </div>
+                <div className="empty-state"><p className="empty-text">Cargando...</p></div>
             ) : (
                 <>
-                    <div className="content-grid">
+                    <div className={styles['content-grid']}>
                         {artists.map((artist, index) => (
                             <div
                                 key={artist.id}
-                                className={`animate-entrance ${artist.is_wide ? 'grid-item-wide' : ''}`}
-                                style={{ animationDelay: `${index * 0.05}s` }}
+                                className={`${styles['animate-entrance']} ${artist.is_wide ? styles['grid-item-wide'] : ''}`}
+                                style={{ animationDelay: `${Math.min(index, 20) * 0.05}s` }}
                             >
                                 <ArtistCard
                                     id={artist.id}
                                     name={artist.name}
                                     genre={artist.genre}
                                     image={artist.image_url || undefined}
-                                    followers={artist.followers_count}
                                     isWide={artist.is_wide}
                                     showFireEffect={showTopOnly && artist.is_top}
                                     onClick={() => {
@@ -229,13 +212,13 @@ function ArtistsContent() {
 
                     {artists.length === 0 && (
                         <div className="empty-state">
-                            <p className="empty-text">{t('artists.empty')}</p>
-                            <p className="empty-desc">{t('artists.empty_desc')}</p>
+                            <p className="empty-text">No se encontraron artistas</p>
+                            <p className="empty-desc">No se encontraron artistas que coincidan con tus filtros</p>
                         </div>
                     )}
 
                     {!isReachingEnd && !isEmpty && (
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
                             <Button
                                 onClick={handleLoadMore}
                                 disabled={isLoadingMore}
@@ -243,7 +226,7 @@ function ArtistsContent() {
                                 size="lg"
                                 variant="primary"
                             >
-                                {isLoadingMore ? t('artists.loading_more') : t('artists.load_more')}
+                                {isLoadingMore ? 'Cargando...' : 'Cargar más'}
                             </Button>
                         </div>
                     )}
@@ -254,9 +237,10 @@ function ArtistsContent() {
 }
 
 export default function ArtistsPage() {
+
     return (
         <main className={styles.main}>
-            <Suspense fallback={<div className="content-grid"><SkeletonCard variant="artist" count={12} /></div>}>
+            <Suspense fallback={<div className="flex-center" style={{ padding: '4rem 0' }}><p>Cargando...</p></div>}>
                 <ArtistsContent />
             </Suspense>
         </main>

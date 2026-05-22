@@ -32,7 +32,7 @@
 .default .gradient_orb_1 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, hsl(24.6, 95%, 53.1%) 0%, transparent 70%);
+    background: radial-gradient(circle, hsl(349, 90%, 42%) 0%, transparent 70%);
     top: -10%;
     right: -10%;
     animation-delay: 0s;
@@ -127,7 +127,7 @@
 .profile .gradient_orb_2 {
     width: 440px;
     height: 440px;
-    background: radial-gradient(circle, hsl(15, 80%, 65%) 0%, transparent 70%);
+    background: radial-gradient(circle, hsl(340, 80%, 55%) 0%, transparent 70%);
     bottom: -10%;
     left: -8%;
     animation: float 23s ease-in-out infinite;

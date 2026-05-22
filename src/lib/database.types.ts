@@ -1,16 +1,36 @@
+export interface ArtistMember {
+    name: string
+    role?: string
+    active?: boolean
+}
+
+export interface ArtistAchievement {
+    icon?: string
+    label: string
+}
+
 export interface Artist {
     id: number
     name: string
-    genre: string
+    real_name: string | null
+    artist_status: boolean | null
+    members: ArtistMember[] | null
+    achievements: ArtistAchievement[] | null
+    genre: string[] | null
     image_url: string | null
-    image_landscape_url: string | null
     hero_images: string[] | null
     followers_count: string
     description: string | null
     is_top: boolean
     is_wide: boolean
     created_at: string
+    website: string | null
+    social_twitter: string | null
+    social_instagram: string | null
+    social_facebook: string | null
+    social_youtube: string | null
 }
+
 
 export interface Album {
     id: number

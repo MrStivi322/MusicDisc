@@ -1,0 +1,67 @@
+.notification_container {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-modal, 1050);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg, 0.75rem);
+    background: var(--color-card, #fff);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--glass-border);
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: none;
+    backdrop-filter: blur(var(--blur-md, 8px));
+}
+
+.notification_container.hiding {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -2rem);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -2rem);
+    }
+}
+
+.icon {
+    font-size: 1.5rem;
+}
+
+.success .icon {
+    color: var(--color-success);
+}
+
+.error .icon {
+    color: var(--color-destructive);
+}
+
+.info .icon {
+    color: var(--color-info);
+}
+
+.message {
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    color: var(--color-card-foreground);
+    margin: 0;
+}

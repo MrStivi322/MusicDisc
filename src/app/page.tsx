@@ -1,11 +1,46 @@
 "use client"
 
-import styles from "@/styles/pages/Home.module.css"
-import { useLanguage } from "@/contexts/LanguageContext"
+import styles from "@/styles/home/Home.module.css"
+
 import { useEffect, useState } from "react"
 
+import Link from "next/link"
+
+function Footer() {
+  const t = (k: string) => k
+
+
+  const currentYear = new Date().getFullYear()
+
+  const footerLinks = [
+    { label:'Privacy', href: '/legal?type=privacy' },
+    { label: 'Terms', href: '/legal?type=terms' },
+  ]
+
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.container}>
+        <div className={styles.left}>
+          <h3 className={styles.brand_title}>AUIDIONAUTA</h3>
+          <p className={styles.copyright}>© {currentYear} All rights reserved.</p>
+        </div>
+
+        <div className={styles.center}>
+          {footerLinks.map((link) => (
+            <Link key={link.href} href={link.href} className={styles.footer_link}>
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </footer>
+  )
+}
+
 export default function Home() {
-  const { t } = useLanguage()
+  const t = (k: string) => k
+
+
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -13,72 +48,66 @@ export default function Home() {
   }, [])
 
   return (
-    <main className={styles.main}>
-      <div className={styles.hero_section}>
+    <>
+      <main className={styles.main}>
+        <div className={styles.hero_section}>
 
-        <div className={`${styles.hero_content} ${mounted ? styles.mounted : ''}`}>
+          <div className={`${styles.hero_content} ${mounted ? styles.mounted : ''}`}>
 
-          <h1 className={styles.hero_title}>
-            {t('home.hero.title')}
-          </h1>
+            <h1 className={styles.hero_title}>Descubre tus Artistas</h1>
 
-          <div className={styles.functions_grid}>
-            <div className={styles.function_card}>
-              <div className={styles.function_icon}>
-                <i className="bx bx-scan-search"></i>
+            <div className={styles.functions_grid}>
+              <div className={styles.function_card}>
+                <div className={styles.function_icon}>
+                  <i className="bx bx-user bx-remove-padding"></i>
+                </div>
+                <h3>Nuestro Publico</h3>
+                <p>Jóvenes interesados en la música y interesados a explorar nuevos generos</p>
               </div>
-              <h3>{t('home.function.search.title')}</h3>
-              <p>{t('home.function.search.desc')}</p>
+
+              <div className={styles.function_card}>
+                <div className={styles.function_icon}>
+                  <i className="bx bx-search bx-remove-padding" />
+                </div>
+                <h3>Qué nos hace especial</h3>
+                <p>Mientras otras plataformas te hacen navegar por algoritmos y menús confusos, tenemos directamente sin buscar por minutos para encontrar lo que
+quieres</p>
+              </div>
+
+              <div className={styles.function_card}>
+                <div className={styles.function_icon}>
+                  <i className="bx bx-message-dots bx-remove-padding"></i>
+                </div>
+                <h3>Proyecto personal</h3>
+                <p>Porque me gusta la musica y ya tenía este proyecto empezado desde hace tiempo</p>
+              </div>
             </div>
 
-            <div className={styles.function_card}>
-              <div className={styles.function_icon}>
-                <i className="bx bx-message-dots"></i>
+            <div className={styles.stats_container}>
+              <div className={styles.stat_item}>
+                <div className={styles.stat_number}>1000+</div>
+                <div className={styles.stat_label}>Artistas</div>
               </div>
-              <h3>{t('home.function.forum.title')}</h3>
-              <p>{t('home.function.forum.desc')}</p>
-            </div>
 
-            <div className={styles.function_card}>
-              <div className={styles.function_icon}>
-                <i className="bx bx-user-circle"></i>
-              </div>
-              <h3>{t('home.function.profile.title')}</h3>
-              <p>{t('home.function.profile.desc')}</p>
-            </div>
+              <div className={styles.stat_divider}></div>
 
-            <div className={styles.function_card}>
-              <div className={styles.function_icon}>
-                <i className="bxl bx-spotify"></i>
+              <div className={styles.stat_item}>
+                <div className={styles.stat_number}>500+</div>
+                <div className={styles.stat_label}>Noticias</div>
               </div>
-              <h3>{t('home.function.spotify.title')}</h3>
-              <p>{t('home.function.spotify.desc')}</p>
+
+              <div className={styles.stat_divider}></div>
+
+              <div className={styles.stat_item}>
+                <div className={styles.stat_number}>24/7</div>
+                <div className={styles.stat_label}>Actualizaciones</div>
+              </div>
             </div>
           </div>
 
-          <div className={styles.stats_container}>
-            <div className={styles.stat_item}>
-              <div className={styles.stat_number}>1000+</div>
-              <div className={styles.stat_label}>{t('home.stats.artists')}</div>
-            </div>
-
-            <div className={styles.stat_divider}></div>
-
-            <div className={styles.stat_item}>
-              <div className={styles.stat_number}>500+</div>
-              <div className={styles.stat_label}>{t('home.stats.news')}</div>
-            </div>
-
-            <div className={styles.stat_divider}></div>
-
-            <div className={styles.stat_item}>
-              <div className={styles.stat_number}>24/7</div>
-              <div className={styles.stat_label}>{t('home.stats.updates')}</div>
-            </div>
-          </div>
         </div>
-
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   )
 }

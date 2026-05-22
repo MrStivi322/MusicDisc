@@ -1,42 +1,209 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useLanguage } from "@/contexts/LanguageContext"
+
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
 import { useSpotify } from "@/contexts/SpotifyContext"
+import { useNotification } from "@/contexts/NotificationContext"
 import Image from "next/image"
-import styles from "@/styles/pages/Settings.module.css"
-import dynamic from "next/dynamic"
+import styles from "@/styles/settings/Settings.module.css"
+import "@/app/globals.css"
+import Cropper from 'react-easy-crop'
+import type { Point, Area } from 'react-easy-crop'
+import cropperStyles from '@/styles/settings/ImageCropper.module.css'
+import { useCallback } from "react"
 import { validate, profileUpdateSchema, passwordChangeSchema, calculatePasswordStrength } from "@/lib/validation"
 import { rateLimiter, RATE_LIMITS } from "@/lib/rateLimiter"
-
-// New Standard Components
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 
-const ImageCropper = dynamic(() => import("@/components/ImageCropper").then(mod => mod.ImageCropper), {
-    loading: () => <div>...</div>,
-    ssr: false
-})
+interface ImageCropperProps {
+    imageSrc: string
+    onCropComplete: (croppedImage: Blob) => void
+    onCancel: () => void
+}
 
-const LANGUAGES = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' }
-]
+function ImageCropper({ imageSrc, onCropComplete, onCancel }: ImageCropperProps) {
+    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 })
+    const [zoom, setZoom] = useState(1)
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onCancel()
+                return
+            }
+
+            if (e.key === 'Tab') {
+                const focusableElements = containerRef.current?.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                )
+
+                if (!focusableElements || focusableElements.length === 0) return
+
+                const firstElement = focusableElements[0] as HTMLElement
+                const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+                if (e.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault()
+                        lastElement.focus()
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault()
+                        firstElement.focus()
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown)
+
+        const timer = setTimeout(() => {
+            const firstInput = containerRef.current?.querySelector('input')
+            if (firstInput) firstInput.focus()
+        }, 100)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+            clearTimeout(timer)
+        }
+    }, [onCancel])
+
+    const onCropChange = (crop: Point) => {
+        setCrop(crop)
+    }
+
+    const onZoomChange = (zoom: number) => {
+        setZoom(zoom)
+    }
+
+    const onCropAreaChange = (croppedArea: Area, croppedAreaPixels: Area) => {
+        setCroppedAreaPixels(croppedAreaPixels)
+    }
+
+    const createImage = (url: string): Promise<HTMLImageElement> =>
+        new Promise((resolve, reject) => {
+            const image = new window.Image()
+            image.addEventListener('load', () => resolve(image))
+            image.addEventListener('error', (error: any) => reject(error))
+            image.setAttribute('crossOrigin', 'anonymous')
+            image.src = url
+        })
+
+    const getCroppedImg = async (
+        imageSrc: string,
+        pixelCrop: Area
+    ): Promise<Blob> => {
+        const image = await createImage(imageSrc)
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+
+        if (!ctx) {
+            throw new Error('No 2d context')
+        }
+
+        canvas.width = pixelCrop.width
+        canvas.height = pixelCrop.height
+
+        ctx.drawImage(
+            image,
+            pixelCrop.x,
+            pixelCrop.y,
+            pixelCrop.width,
+            pixelCrop.height,
+            0,
+            0,
+            pixelCrop.width,
+            pixelCrop.height
+        )
+
+        return new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error('Canvas is empty'))
+                    return
+                }
+                resolve(blob)
+            }, 'image/jpeg')
+        })
+    }
+
+    const handleSave = async () => {
+        if (croppedAreaPixels) {
+            try {
+                const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
+                onCropComplete(croppedImage)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+
+    return (
+        <div
+            className={cropperStyles.cropper_container}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cropper-title"
+            ref={containerRef}
+        >
+            <div className={cropperStyles.cropper_wrapper}>
+                <Cropper
+                    image={imageSrc}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    onCropChange={onCropChange}
+                    onCropComplete={onCropAreaChange}
+                    onZoomChange={onZoomChange}
+                />
+            </div>
+            <div className={cropperStyles.controls}>
+                <div className={cropperStyles.slider_container}>
+                    <label htmlFor="zoom-slider" className={cropperStyles.slider_label}>Zoom</label>
+                    <input
+                        id="zoom-slider"
+                        type="range"
+                        value={zoom}
+                        min={1}
+                        max={3}
+                        step={0.1}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                        className={cropperStyles.slider}
+                    />
+                </div>
+                <div className={cropperStyles.buttons}>
+                    <button onClick={onCancel} className={cropperStyles.btn_cancel}>
+                        Cancelar
+                    </button>
+                    <button onClick={handleSave} className={cropperStyles.btn_save}>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+
 
 export default function SettingsPage() {
-    const { language, setLanguage, t } = useLanguage()
     const { user } = useAuth()
     const router = useRouter()
     const { token, login, logout } = useSpotify()
 
     const [loading, setLoading] = useState(false)
     const [uploading, setUploading] = useState(false)
-    const [success, setSuccess] = useState("")
-    const [error, setError] = useState("")
+    const { showNotification } = useNotification()
+    const setSuccess = (msg: string) => { if (msg) showNotification(msg, 'success') }
+    const setError = (msg: string) => { if (msg) showNotification(msg, 'error') }
 
     const [isEditingProfile, setIsEditingProfile] = useState(false)
     const [isChangingPassword, setIsChangingPassword] = useState(false)
@@ -56,19 +223,6 @@ export default function SettingsPage() {
     // Theme state (using localStorage)
     const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
 
-    // Notification preferences
-    const [notificationPrefs, setNotificationPrefs] = useState({
-        email: true,
-        push: false,
-        forum: true
-    })
-
-    // Privacy settings
-    const [privacySettings, setPrivacySettings] = useState({
-        publicProfile: true,
-        showActivity: false
-    })
-
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
     const [isCropping, setIsCropping] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -83,18 +237,6 @@ export default function SettingsPage() {
         const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system'
         if (savedTheme) {
             setTheme(savedTheme)
-        }
-
-        // Load notification preferences from localStorage
-        const savedNotifs = localStorage.getItem('notificationPrefs')
-        if (savedNotifs) {
-            setNotificationPrefs(JSON.parse(savedNotifs))
-        }
-
-        // Load privacy settings from localStorage
-        const savedPrivacy = localStorage.getItem('privacySettings')
-        if (savedPrivacy) {
-            setPrivacySettings(JSON.parse(savedPrivacy))
         }
     }, [user])
 
@@ -132,24 +274,12 @@ export default function SettingsPage() {
         }
     }
 
-    const handleNotificationChange = (key: keyof typeof notificationPrefs) => {
-        const newPrefs = { ...notificationPrefs, [key]: !notificationPrefs[key] }
-        setNotificationPrefs(newPrefs)
-        localStorage.setItem('notificationPrefs', JSON.stringify(newPrefs))
-    }
-
-    const handlePrivacyChange = (key: keyof typeof privacySettings) => {
-        const newSettings = { ...privacySettings, [key]: !privacySettings[key] }
-        setPrivacySettings(newSettings)
-        localStorage.setItem('privacySettings', JSON.stringify(newSettings))
-    }
-
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0]
 
             if (file.size > 5 * 1024 * 1024) {
-                setError(t('settings.error.file_size'))
+                setError("El archivo supera el tamaño máximo permitido de 5MB")
                 return
             }
 
@@ -206,9 +336,9 @@ export default function SettingsPage() {
             if (updateError) throw updateError
 
             setFormData(prev => ({ ...prev, avatarUrl: data.publicUrl }))
-            setSuccess(t('settings.avatar.success'))
+            setSuccess("Actualizado Correctamente")
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : t('error.unknown')
+            const message = err instanceof Error ? err.message : "Error"
             setError(message)
         } finally {
             setUploading(false)
@@ -228,7 +358,7 @@ export default function SettingsPage() {
 
         if (!limitCheck.canProceed) {
             setError(
-                t('error.rate_limit.profile')
+                "Has superado el límite de intentos. Por favor espera {seconds} segundos."
                     .replace('{seconds}', limitCheck.resetIn.toString())
                     .replace('{max}', RATE_LIMITS.PROFILE_UPDATE.maxAttempts.toString())
             );
@@ -243,7 +373,7 @@ export default function SettingsPage() {
 
         if (!result.success) {
             const firstError = Object.values(result.errors)[0]
-            setError(firstError || t('error.invalid_form'))
+            setError(firstError || "Formulario no válido")
             setLoading(false)
             return
         }
@@ -265,10 +395,10 @@ export default function SettingsPage() {
                 if (emailError) throw emailError
             }
 
-            setSuccess(t('settings.profile.success'))
+            setSuccess("Actualizado Correctamente")
             setIsEditingProfile(false)
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : t('error.unknown')
+            const message = err instanceof Error ? err.message : "Error"
             setError(message)
         } finally {
             setLoading(false)
@@ -288,7 +418,7 @@ export default function SettingsPage() {
 
         if (!limitCheck.canProceed) {
             setError(
-                t('error.rate_limit.password')
+                "Has superado el límite de intentos. Por favor espera {minutes} minutos."
                     .replace('{minutes}', Math.ceil(limitCheck.resetIn / 60).toString())
                     .replace('{max}', RATE_LIMITS.PASSWORD_CHANGE.maxAttempts.toString())
             );
@@ -300,7 +430,7 @@ export default function SettingsPage() {
 
         if (!result.success) {
             const firstError = Object.values(result.errors)[0]
-            setError(firstError || t('error.invalid_form'))
+            setError(firstError || "Formulario no válido")
             setLoading(false)
             return
         }
@@ -312,7 +442,7 @@ export default function SettingsPage() {
             })
 
             if (signInError) {
-                throw new Error(t('settings.error.current_password_incorrect'))
+                throw new Error("Contraseña Actual Incorrecta")
             }
 
             const strength = calculatePasswordStrength(passwordData.newPassword)
@@ -327,11 +457,11 @@ export default function SettingsPage() {
 
             if (updateError) throw updateError
 
-            setSuccess(t('settings.password.success'))
+            setSuccess("Actualizada Correctamente")
             setIsChangingPassword(false)
             setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : t('error.unknown')
+            const message = err instanceof Error ? err.message : "Error"
             setError(message)
         } finally {
             setLoading(false)
@@ -347,8 +477,8 @@ export default function SettingsPage() {
             </div>
             <span className={styles.strength_text}>
                 {strength === 0 ? '' :
-                    strength <= 2 ? t('settings.security.weak') :
-                        strength <= 4 ? t('settings.security.medium') : t('settings.security.strong')}
+                    strength <= 2 ? "Debil" :
+                        strength <= 4 ? "Media" : "Segura"}
             </span>
         </div>
     )
@@ -364,59 +494,37 @@ export default function SettingsPage() {
             )}
 
             <div className="page-container">
-                <SectionHeader title={t('settings.title') || "Configuración"} />
+                <SectionHeader title="Configuración"/>
 
                 <div className={styles.settings_grid}>
-                    {/* Language Section */}
-                    <div className="card animate-entrance">
-                        <div className="card-body">
-                            <div className={styles.section_header}>
-                                <i className={`bx bx-translate ${styles.section_icon}`}></i>
-                                <div>
-                                    <h2 className={styles.section_title}>{t('settings.language')}</h2>
-                                </div>
-                            </div>
 
-                            <div className={styles.language_grid}>
-                                {LANGUAGES.map((lang) => (
-                                    <button
-                                        key={lang.code}
-                                        onClick={() => setLanguage(lang.code as 'en' | 'es')}
-                                        className={`${styles.language_card} ${language === lang.code ? styles.language_card_active : ''}`}
-                                    >
-                                        <span className={styles.flag}>{lang.flag}</span>
-                                        <span className={styles.language_name}>{lang.name}</span>
-                                        {language === lang.code && (
-                                            <div className={styles.active_indicator} />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Appearance Section */}
-                    <div className="card animate-entrance">
-                        <div className="card-body">
+                    <div className={styles.card}>
+                        <div className={styles.card_body}>
                             <div className={styles.section_header}>
-                                <i className={`bx bx-palette ${styles.section_icon}`}></i>
+                                <i className={`bx bx-contrast bx-remove-padding ${styles.section_icon}`}></i>
                                 <div>
-                                    <h2 className={styles.section_title}>{t('settings.appearance')}</h2>
+                                    <h2 className={styles.section_title}>Apariencia</h2>
                                 </div>
                             </div>
 
                             <div className={styles.theme_grid}>
-                                {(['light', 'dark', 'system'] as const).map((themeOption) => (
+                                {([
+                                    { id: 'light', label: 'Claro' },
+                                    { id: 'dark', label: 'Oscuro' },
+                                    { id: 'system', label: 'del Sistema' }
+                                ] as const).map((option) => (
                                     <button
-                                        key={themeOption}
-                                        onClick={() => handleThemeChange(themeOption)}
-                                        className={`${styles.theme_card} ${theme === themeOption ? styles.theme_card_active : ''}`}
+                                        key={option.id}
+                                        onClick={() => handleThemeChange(option.id)}
+                                        className={`${styles.theme_card} ${theme === option.id ? styles.theme_card_active : ''}`}
                                     >
-                                        <i className={`bx ${themeOption === 'light' ? 'bx-sun' :
-                                            themeOption === 'dark' ? 'bx-moon' : 'bx-desktop'
+                                        <i className={`bx ${option.id === 'light' ? 'bx-brightness bx-remove-padding' :
+                                            option.id === 'dark' ? 'bx-moon-star bx-remove-padding' : 'bx-desktop bx-remove-padding'
                                             } ${styles.theme_icon}`}></i>
-                                        <span className={styles.theme_name}>{t(`settings.theme.${themeOption}`)}</span>
-                                        {theme === themeOption && (
+                                        <span className={styles.theme_name}>Tema {option.label}</span>
+                                        {theme === option.id && (
                                             <div className={styles.active_indicator} />
                                         )}
                                     </button>
@@ -428,12 +536,12 @@ export default function SettingsPage() {
                     {user && (
                         <>
                             {/* Profile Section */}
-                            <div className="card animate-entrance">
-                                <div className="card-body">
+                            <div className={styles.card}>
+                                <div className={styles.card_body}>
                                     <div className={styles.section_header}>
-                                        <i className={`bx bx-user ${styles.section_icon}`}></i>
+                                        <i className={`bx bx-user bx-remove-padding ${styles.section_icon}`}></i>
                                         <div>
-                                            <h2 className={styles.section_title}>{t('user.profile')}</h2>
+                                            <h2 className={styles.section_title}>Perfil</h2>
                                         </div>
                                     </div>
 
@@ -443,7 +551,7 @@ export default function SettingsPage() {
                                                 {formData.avatarUrl ? (
                                                     <Image
                                                         src={formData.avatarUrl}
-                                                        alt={t('common.avatar')}
+                                                        alt="Avatar"
                                                         className={styles.avatar_image}
                                                         width={120}
                                                         height={120}
@@ -458,9 +566,8 @@ export default function SettingsPage() {
                                                     className={styles.avatar_edit_btn}
                                                     onClick={() => fileInputRef.current?.click()}
                                                     disabled={uploading}
-                                                    title={t('settings.avatar.change')}
                                                 >
-                                                    <i className='bx bx-camera'></i>
+                                                    <i className='bx bx-camera bx-remove-padding'></i>
                                                 </button>
                                                 <input
                                                     ref={fileInputRef}
@@ -470,25 +577,19 @@ export default function SettingsPage() {
                                                     className={styles.file_input}
                                                 />
                                             </div>
-                                            <div className={styles.avatar_info}>
-                                                <h3>{formData.username || t('user.anonymous')}</h3>
-                                                <p>{user.email}</p>
-                                            </div>
                                         </div>
 
-                                        {success && <div className={styles.success_message}>{success}</div>}
-                                        {error && <div className={styles.error_message}>{error}</div>}
 
                                         <div className={styles.info_group}>
                                             <div className={styles.group_header}>
-                                                <h3>{t('settings.personal_info')}</h3>
+                                                <h3>Información personal</h3>
                                                 {!isEditingProfile && (
                                                     <Button
                                                         onClick={() => setIsEditingProfile(true)}
                                                         variant="ghost"
                                                         size="sm"
                                                     >
-                                                        {t('settings.edit')}
+                                                        Editar
                                                     </Button>
                                                 )}
                                             </div>
@@ -497,18 +598,19 @@ export default function SettingsPage() {
                                                 <form onSubmit={handleUpdateProfile} className={styles.form}>
                                                     <div className={styles.field}>
                                                         <Input
-                                                            label={t('settings.form.username')}
+                                                            label="Nombre de Usuario"
+                                                            placeholder="Tu Usuario"
                                                             type="text"
                                                             value={formData.username}
                                                             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                                            placeholder="johndoe"
                                                         />
                                                     </div>
 
                                                     <div className={styles.field}>
                                                         <Input
-                                                            label={t('settings.form.email')}
+                                                            label="Correo"
                                                             type="email"
+                                                            placeholder="Tu Correo"
                                                             value={formData.email}
                                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                         />
@@ -520,7 +622,7 @@ export default function SettingsPage() {
                                                             onClick={() => setIsEditingProfile(false)}
                                                             variant="outline"
                                                         >
-                                                            {t('settings.cancel')}
+                                                            Cancelar
                                                         </Button>
                                                         <Button
                                                             type="submit"
@@ -528,18 +630,18 @@ export default function SettingsPage() {
                                                             variant="primary"
                                                             isLoading={loading}
                                                         >
-                                                            {t('settings.form.save')}
+                                                            Guardar
                                                         </Button>
                                                     </div>
                                                 </form>
                                             ) : (
                                                 <div className={styles.info_display}>
                                                     <div className={styles.info_item}>
-                                                        <span className={styles.info_label}>{t('settings.form.username')}</span>
+                                                        <span className={styles.info_label}>Nombre de Usuario</span>
                                                         <span className={styles.info_value}>{formData.username || '-'}</span>
                                                     </div>
                                                     <div className={styles.info_item}>
-                                                        <span className={styles.info_label}>{t('settings.form.email')}</span>
+                                                        <span className={styles.info_label}>Correo</span>
                                                         <span className={styles.info_value}>{formData.email}</span>
                                                     </div>
                                                 </div>
@@ -548,14 +650,14 @@ export default function SettingsPage() {
 
                                         <div className={styles.info_group}>
                                             <div className={styles.group_header}>
-                                                <h3>{t('settings.security')}</h3>
+                                                <h3>Seguridad</h3>
                                                 {!isChangingPassword && (
                                                     <Button
                                                         onClick={() => setIsChangingPassword(true)}
                                                         variant="ghost"
                                                         size="sm"
                                                     >
-                                                        {t('settings.change_password')}
+                                                        Editar
                                                     </Button>
                                                 )}
                                             </div>
@@ -564,7 +666,7 @@ export default function SettingsPage() {
                                                 <form onSubmit={handleChangePassword} className={styles.form} autoComplete="off">
                                                     <div className={styles.field}>
                                                         <Input
-                                                            label={t('settings.form.current_password')}
+                                                            label="Contraseña Actual"
                                                             type="password"
                                                             value={passwordData.currentPassword}
                                                             onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
@@ -575,7 +677,7 @@ export default function SettingsPage() {
 
                                                     <div className={styles.field}>
                                                         <Input
-                                                            label={t('settings.form.new_password')}
+                                                            label="Nueva Contraseña"
                                                             type="password"
                                                             value={passwordData.newPassword}
                                                             onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
@@ -591,7 +693,7 @@ export default function SettingsPage() {
 
                                                     <div className={styles.field}>
                                                         <Input
-                                                            label={t('settings.form.confirm_password')}
+                                                            label="Confirmar Nueva Contraseña"
                                                             type="password"
                                                             value={passwordData.confirmPassword}
                                                             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
@@ -609,7 +711,7 @@ export default function SettingsPage() {
                                                             }}
                                                             variant="outline"
                                                         >
-                                                            {t('settings.cancel')}
+                                                            Cancelar
                                                         </Button>
                                                         <Button
                                                             type="submit"
@@ -617,22 +719,22 @@ export default function SettingsPage() {
                                                             variant="primary"
                                                             isLoading={loading}
                                                         >
-                                                            {t('settings.form.update_password')}
+                                                            Guardar
                                                         </Button>
                                                     </div>
                                                 </form>
                                             ) : (
                                                 <div className={styles.info_display}>
                                                     <div className={styles.info_item}>
-                                                        <span className={styles.info_label}>{t('settings.security.last_changed')}</span>
+                                                        <span className={styles.info_label}>Ultimo Cambio</span>
                                                         <span className={styles.info_value}>
                                                             {user.user_metadata?.password_last_changed
                                                                 ? new Date(user.user_metadata.password_last_changed).toLocaleDateString()
-                                                                : t('settings.security.never')}
+                                                                : "Nunca"}
                                                         </span>
                                                     </div>
                                                     <div className={styles.info_item}>
-                                                        <span className={styles.info_label}>{t('settings.security.level')}</span>
+                                                        <span className={styles.info_label}>Nivel de Seguridad</span>
                                                         <div className={styles.security_value}>
                                                             {renderStrengthMeter(user.user_metadata?.password_strength || 0)}
                                                         </div>
@@ -644,136 +746,27 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            {/* Notifications Section */}
-                            {/* 
-                            <div className="card animate-entrance">
-                                <div className="card-body">
-                                    <div className={styles.section_header}>
-                                        <i className={`bx bx-bell ${styles.section_icon}`}></i>
-                                        <div>
-                                            <h2 className={styles.section_title}>{t('settings.notifications')}</h2>
-                                            <p className={styles.section_desc}>{t('settings.notifications.desc')}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.options_list}>
-                                        <div className={styles.option_item}>
-                                            <div className={styles.option_info}>
-                                                <div className={styles.option_title}>{t('settings.notifications.email')}</div>
-                                                <div className={styles.option_desc}>{t('settings.notifications.email.desc')}</div>
-                                            </div>
-                                            <label className={styles.toggle_switch}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={notificationPrefs.email}
-                                                    onChange={() => handleNotificationChange('email')}
-                                                />
-                                                <span className={styles.toggle_slider}></span>
-                                            </label>
-                                        </div>
-
-                                        <div className={styles.option_item}>
-                                            <div className={styles.option_info}>
-                                                <div className={styles.option_title}>{t('settings.notifications.push')}</div>
-                                                <div className={styles.option_desc}>{t('settings.notifications.push.desc')}</div>
-                                            </div>
-                                            <label className={styles.toggle_switch}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={notificationPrefs.push}
-                                                    onChange={() => handleNotificationChange('push')}
-                                                />
-                                                <span className={styles.toggle_slider}></span>
-                                            </label>
-                                        </div>
-
-                                        <div className={styles.option_item}>
-                                            <div className={styles.option_info}>
-                                                <div className={styles.option_title}>{t('settings.notifications.forum')}</div>
-                                                <div className={styles.option_desc}>{t('settings.notifications.forum.desc')}</div>
-                                            </div>
-                                            <label className={styles.toggle_switch}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={notificationPrefs.forum}
-                                                    onChange={() => handleNotificationChange('forum')}
-                                                />
-                                                <span className={styles.toggle_slider}></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            */}
-
-                            {/* Privacy Section */}
-                            {/* 
-                            <div className="card animate-entrance">
-                                <div className="card-body">
-                                    <div className={styles.section_header}>
-                                        <i className={`bx bx-lock-alt ${styles.section_icon}`}></i>
-                                        <div>
-                                            <h2 className={styles.section_title}>{t('settings.privacy')}</h2>
-                                            <p className={styles.section_desc}>{t('settings.privacy.desc')}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.options_list}>
-                                        <div className={styles.option_item}>
-                                            <div className={styles.option_info}>
-                                                <div className={styles.option_title}>{t('settings.privacy.profile')}</div>
-                                                <div className={styles.option_desc}>{t('settings.privacy.profile.desc')}</div>
-                                            </div>
-                                            <label className={styles.toggle_switch}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={privacySettings.publicProfile}
-                                                    onChange={() => handlePrivacyChange('publicProfile')}
-                                                />
-                                                <span className={styles.toggle_slider}></span>
-                                            </label>
-                                        </div>
-
-                                        <div className={styles.option_item}>
-                                            <div className={styles.option_info}>
-                                                <div className={styles.option_title}>{t('settings.privacy.activity')}</div>
-                                                <div className={styles.option_desc}>{t('settings.privacy.activity.desc')}</div>
-                                            </div>
-                                            <label className={styles.toggle_switch}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={privacySettings.showActivity}
-                                                    onChange={() => handlePrivacyChange('showActivity')}
-                                                />
-                                                <span className={styles.toggle_slider}></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            */}
-
                             {/* Account Stats Section */}
                             <div className={styles.settings_section}>
-                                <div className="card animate-entrance">
-                                    <div className="card-body">
+                                <div className={styles.card}>
+                                    <div className={styles.card_body}>
                                         <div className={styles.section_header}>
-                                            <i className={`bx bx-file-detail ${styles.section_icon}`}></i>
+                                            <i className={`bx bx-file-detail bx-remove-padding ${styles.section_icon}`}></i>
                                             <div>
-                                                <h2 className={styles.section_title}>{t('settings.account')}</h2>
+                                                <h2 className={styles.section_title}>Información de la Cuenta</h2>
                                             </div>
                                         </div>
 
                                         <div className={styles.info_display}>
                                             <div className={styles.info_item}>
-                                                <div className={styles.info_label}>{t('settings.account.created')}</div>
+                                                <div className={styles.info_label}>Creación de la Cuenta</div>
                                                 <div className={styles.info_value}>
                                                     {new Date(user.created_at).toLocaleDateString()}
                                                 </div>
                                             </div>
 
                                             <div className={styles.info_item}>
-                                                <div className={styles.info_label}>{t('settings.account.last_login')}</div>
+                                                <div className={styles.info_label}>Ultimo inicio de sesión</div>
                                                 <div className={styles.info_value}>
                                                     {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '-'}
                                                 </div>
@@ -782,22 +775,19 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                                 {/* Spotify Integration Section */}
-                                <div className="card animate-entrance">
-                                    <div className="card-body">
+                                <div className={styles.card}>
+                                    <div className={styles.card_body}>
                                         <div className={styles.section_header}>
-                                            <i className={`bxl bx-spotify ${styles.section_icon} ${styles.spotify_icon}`}></i>
+                                            <i className={`bxl bx-spotify bx-remove-padding ${styles.section_icon} ${styles.spotify_icon}`}></i>
                                             <div>
-                                                <h2 className={styles.section_title}>{t('spotify.title')}</h2>
+                                                <h2 className={styles.section_title}>Integración con Spotify</h2>
                                             </div>
                                         </div>
 
                                         <div className={styles.info_display}>
                                             <div className={styles.info_item}>
                                                 <div className={styles.info_label}>
-                                                    {token ? t('spotify.connected_as') : t('spotify.not_connected')}
-                                                </div>
-                                                <div className={styles.info_value}>
-                                                    {token ? t('spotify.enjoy_music') : t('spotify.connect_desc')}
+                                                    {token ? "Conectado" : "No conectado"}
                                                 </div>
                                             </div>
                                             <Button
@@ -805,7 +795,7 @@ export default function SettingsPage() {
                                                 variant={token ? "outline" : "primary"}
                                                 className={!token ? styles.spotify_button : ""}
                                             >
-                                                {token ? t('spotify.disconnect') : t('spotify.connect')}
+                                                {token ? "Desconectar" : "Conectar"}
                                             </Button>
                                         </div>
                                     </div>

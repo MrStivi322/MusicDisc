@@ -14,7 +14,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 {label && <label className="input-label">{label}</label>}
 
                 <div className={`search-input-container ${icon ? 'has-icon' : ''}`}>
-                    {icon && <i className={`bx ${icon}`}></i>}
+                    {icon && <i className={`bx ${icon} bx-remove-padding`}></i>}
                     <input
                         ref={ref}
                         className={`form-control ${className} ${error ? 'is-invalid' : ''}`}

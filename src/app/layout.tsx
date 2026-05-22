@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
-import { Inter, Comfortaa } from "next/font/google";
+import { Open_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/Navbar";
 import { AuthProvider } from "@/components/AuthProvider";
-import { LanguageProvider } from "@/contexts/LanguageContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
+
 import { PlayerProvider } from "@/contexts/PlayerContext";
 import { SpotifyProvider } from "@/contexts/SpotifyContext";
 import ClientLayoutContent from "@/components/ClientLayoutContent";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import SmoothScroll from "@/components/SmoothScroll";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const inter = Inter({
+const openSans = Open_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-open-sans",
   display: "swap",
 });
 
-const comfortaa = Comfortaa({
-  subsets: ["latin"],
-  variable: "--font-comfortaa",
+const inversionz = localFont({
+  src: "../fonts/Inversionz.ttf",
+  variable: "--font-inversionz",
   display: "swap",
 });
 
@@ -63,7 +64,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/icon.png',
-    apple: '/apple-icon.png',
   },
 };
 
@@ -73,41 +73,37 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#FF6F3D" />
+        <meta name="theme-color" content="#cc0a2f" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link href='https://cdn.boxicons.com/3.0.4/fonts/basic/boxicons.min.css' rel='stylesheet' />
-        <link href='https://cdn.boxicons.com/3.0.4/fonts/brands/boxicons-brands.min.css' rel='stylesheet' />
+        <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet" />
+        <link href="https://cdn.boxicons.com/3.0.8/fonts/filled/boxicons-filled.min.css" rel="stylesheet" />
+        <link href="https://cdn.boxicons.com/3.0.8/fonts/brands/boxicons-brands.min.css" rel="stylesheet" />
         <link rel="preload" as="image" href="/icon.png" />
       </head>
-      <body className={`${inter.variable} ${comfortaa.variable}`}>
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <ErrorBoundary>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-            storageKey="musicdisc-theme"
-          >
-            <LanguageProvider>
-              <AuthProvider>
-                <PlayerProvider>
-                  <SpotifyProvider>
-                    <SmoothScroll />
-                    <AnimatedBackground />
-                    <ClientLayoutContent>{children}</ClientLayoutContent>
-                  </SpotifyProvider>
-                </PlayerProvider>
-              </AuthProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+      <body className={`${openSans.variable} ${inversionz.variable}`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="musicdisc-theme"
+        >
+          <NotificationProvider>
+            <AuthProvider>
+              <PlayerProvider>
+                <SpotifyProvider>
+                  <SmoothScroll />
+                  <AnimatedBackground />
+                  <ClientLayoutContent>{children}</ClientLayoutContent>
+                </SpotifyProvider>
+              </PlayerProvider>
+            </AuthProvider>
+          </NotificationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

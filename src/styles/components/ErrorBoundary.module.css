@@ -88,13 +88,13 @@
 .error_details summary {
     cursor: pointer;
     font-weight: 600;
-    color: hsl(24, 95%, 53%);
+    color: hsl(349, 90%, 42%);
     padding: 0.5rem;
     user-select: none;
 }
 
 .error_details summary:hover {
-    color: hsl(24, 95%, 65%);
+    color: hsl(349, 85%, 55%);
 }
 
 .error_stack {
@@ -138,14 +138,14 @@
 }
 
 .btn_primary {
-    background: linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(24, 95%, 65%) 100%);
+    background: linear-gradient(135deg, hsl(349, 90%, 42%) 0%, hsl(340, 80%, 50%) 100%);
     color: white;
-    box-shadow: 0 4px 16px rgba(255, 111, 61, 0.3);
+    box-shadow: 0 4px 16px rgba(204, 10, 47, 0.3);
 }
 
 .btn_primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(255, 111, 61, 0.4);
+    box-shadow: 0 6px 24px rgba(204, 10, 47, 0.4);
 }
 
 .btn_primary:active {

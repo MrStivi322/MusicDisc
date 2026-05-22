@@ -19,12 +19,12 @@ export function SpotifyProvider({ children }: { children: React.ReactNode }) {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
-            // Check for existing token and expiration
+            // Load existing tokens from localStorage
             let _token = window.localStorage.getItem("musicdisc_spotify_token")
             const _refreshToken = window.localStorage.getItem("musicdisc_spotify_refresh_token")
             const _expiresAt = window.localStorage.getItem("musicdisc_spotify_expires_at")
 
-            // If we have a code, exchange it (Priority 1)
+            // Priority 1: If we have a code in URL, exchange it for tokens (first login)
             if (code) {
                 try {
                     const data = await exchangeToken(code);
@@ -46,8 +46,8 @@ export function SpotifyProvider({ children }: { children: React.ReactNode }) {
                     console.error("Error exchanging token:", error)
                 }
             }
-            // If we have a token but it's expired, try to refresh (Priority 2)
-            else if (_token && _expiresAt && Date.now() > parseInt(_expiresAt) && _refreshToken) {
+            // Priority 2: If we have a token and it's expired, refresh it
+            else if (_token && _expiresAt && _refreshToken && Date.now() > parseInt(_expiresAt)) {
                 try {
                     console.log("Token expired, refreshing...");
                     const data = await import('@/lib/spotifyAuth').then(m => m.refreshAccessToken(_refreshToken));
@@ -76,7 +76,7 @@ export function SpotifyProvider({ children }: { children: React.ReactNode }) {
                     return
                 }
             }
-
+            // Priority 3: If we have a valid token in localStorage, use it
             if (_token) {
                 setToken(_token)
             }
@@ -84,6 +84,85 @@ export function SpotifyProvider({ children }: { children: React.ReactNode }) {
 
         checkAuth()
     }, [])
+
+    // Auto-refresh token 5 minutes before expiration
+    useEffect(() => {
+        if (!token) return
+
+        const _expiresAt = window.localStorage.getItem("musicdisc_spotify_expires_at")
+        const _refreshToken = window.localStorage.getItem("musicdisc_spotify_refresh_token")
+
+        if (!_expiresAt || !_refreshToken) return
+
+        const expiresAt = parseInt(_expiresAt)
+        const now = Date.now()
+        const timeUntilExpiry = expiresAt - now
+        const refreshTime = timeUntilExpiry - (5 * 60 * 1000) // 5 minutes before expiry
+
+        if (refreshTime <= 0) {
+            // Token expires in less than 5 minutes, refresh immediately
+            const refreshNow = async () => {
+                try {
+                    console.log("Auto-refreshing token...");
+                    const data = await import('@/lib/spotifyAuth').then(m => m.refreshAccessToken(_refreshToken));
+
+                    if (data.access_token) {
+                        const newToken = data.access_token
+                        const expiresIn = data.expires_in || 3600
+                        const newExpiresAt = Date.now() + (expiresIn * 1000)
+
+                        window.localStorage.setItem("musicdisc_spotify_token", newToken)
+                        window.localStorage.setItem("musicdisc_spotify_expires_at", newExpiresAt.toString())
+
+                        if (data.refresh_token) {
+                            window.localStorage.setItem("musicdisc_spotify_refresh_token", data.refresh_token)
+                        }
+
+                        setToken(newToken)
+                    } else {
+                        console.error("Auto-refresh failed", data);
+                        logout()
+                    }
+                } catch (error) {
+                    console.error("Error auto-refreshing token:", error)
+                    logout()
+                }
+            }
+            refreshNow()
+            return
+        }
+
+        // Set timer to refresh before expiry
+        const timer = setTimeout(async () => {
+            try {
+                console.log("Auto-refreshing token...");
+                const data = await import('@/lib/spotifyAuth').then(m => m.refreshAccessToken(_refreshToken));
+
+                if (data.access_token) {
+                    const newToken = data.access_token
+                    const expiresIn = data.expires_in || 3600
+                    const newExpiresAt = Date.now() + (expiresIn * 1000)
+
+                    window.localStorage.setItem("musicdisc_spotify_token", newToken)
+                    window.localStorage.setItem("musicdisc_spotify_expires_at", newExpiresAt.toString())
+
+                    if (data.refresh_token) {
+                        window.localStorage.setItem("musicdisc_spotify_refresh_token", data.refresh_token)
+                    }
+
+                    setToken(newToken)
+                } else {
+                    console.error("Auto-refresh failed", data);
+                    logout()
+                }
+            } catch (error) {
+                console.error("Error auto-refreshing token:", error)
+                logout()
+            }
+        }, refreshTime)
+
+        return () => clearTimeout(timer)
+    }, [token])
 
     const login = async () => {
         await redirectToSpotifyAuthorize()

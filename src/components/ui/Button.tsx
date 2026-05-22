@@ -26,7 +26,6 @@ export function Button({
 
     const content = (
         <>
-            {isLoading && <i className='bx bx-loader-alt bx-spin' />}
             {!isLoading && leftIcon && <span className="btn-icon-left">{leftIcon}</span>}
             {children}
             {!isLoading && rightIcon && <span className="btn-icon-right">{rightIcon}</span>}

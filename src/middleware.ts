@@ -36,10 +36,10 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (request.nextUrl.pathname.startsWith('/settings') && !user) {
-        return NextResponse.redirect(new URL('/login', request.url))
+        return NextResponse.redirect(new URL('/auth?mode=login', request.url))
     }
 
-    if ((request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup')) && user) {
+    if (request.nextUrl.pathname.startsWith('/auth') && user) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
@@ -49,8 +49,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         '/settings/:path*',
-        '/login',
-        '/signup',
+        '/auth',
         '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 }
+

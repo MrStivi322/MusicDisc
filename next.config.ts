@@ -34,6 +34,14 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://sdk.scdn.co; style-src 'self' 'unsafe-inline' https://cdn.boxicons.com; img-src 'self' blob: data: https:; font-src 'self' data: https://cdn.boxicons.com; connect-src 'self' https:; frame-src 'self' https:; media-src 'self' https:;"
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
           }
         ]
       }

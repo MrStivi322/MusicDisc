@@ -29,11 +29,28 @@ export async function fetchGenresWithCache(): Promise<string[]> {
         return ['All'];
     }
 
+    // Flatten the array of arrays and filter null/undefined, handling JSON strings
+    const allGenres = data?.flatMap(item => {
+        const g = item.genre as unknown
+        if (!g) return []
+        if (Array.isArray(g)) return g
+        if (typeof g === 'string') {
+            try {
+                const parsed = JSON.parse(g)
+                if (Array.isArray(parsed)) return parsed
+                return [g]
+            } catch {
+                return [g]
+            }
+        }
+        return []
+    }) || [];
+
     const uniqueGenres = Array.from(
-        new Set(data?.map(item => item.genre).filter(Boolean))
+        new Set(allGenres.filter(Boolean))
     ) as string[];
 
-    const result = ['All', ...uniqueGenres];
+    const result = ['All', ...uniqueGenres.sort()];
 
     cache.set(cacheKey, result, 10 * 60 * 1000);
 

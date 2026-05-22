@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import styles from '@/styles/components/ZoomableImage.module.css'
+import styles from '@/styles/forum/ZoomableImage.module.css'
 
 interface ZoomableImageProps {
     src: string
