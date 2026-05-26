@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useRef } from 'react'
@@ -42,11 +41,10 @@ export function Modal({ isOpen, onClose, children, title, size = 'lg' }: ModalPr
         }
     }
 
-    const sizeClass = styles[`modal_${size}`] || styles.modal_lg
 
     return createPortal(
         <div className={styles.overlay} ref={overlayRef} onClick={handleOverlayClick}>
-            <div className={`${styles.modal} ${sizeClass}`} role="dialog" aria-modal="true">
+            <div className={`${styles.modal}`} role="dialog" aria-modal="true">
                 <div className={styles.modal_header}>
                     {title && <h2 className={styles.modal_title}>{title}</h2>}
                     <button onClick={onClose} className={styles.close_button} aria-label="Close modal">

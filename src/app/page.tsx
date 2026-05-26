@@ -4,43 +4,18 @@ import styles from "@/styles/home/Home.module.css"
 
 import { useEffect, useState } from "react"
 
-import Link from "next/link"
-
 function Footer() {
-  const t = (k: string) => k
-
-
   const currentYear = new Date().getFullYear()
-
-  const footerLinks = [
-    { label:'Privacy', href: '/legal?type=privacy' },
-    { label: 'Terms', href: '/legal?type=terms' },
-  ]
 
   return (
     <footer className={styles.footer}>
-      <div className={styles.container}>
-        <div className={styles.left}>
           <h3 className={styles.brand_title}>AUIDIONAUTA</h3>
           <p className={styles.copyright}>© {currentYear} All rights reserved.</p>
-        </div>
-
-        <div className={styles.center}>
-          {footerLinks.map((link) => (
-            <Link key={link.href} href={link.href} className={styles.footer_link}>
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      </div>
     </footer>
   )
 }
 
 export default function Home() {
-  const t = (k: string) => k
-
-
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -50,7 +25,6 @@ export default function Home() {
   return (
     <>
       <main className={styles.main}>
-        <div className={styles.hero_section}>
 
           <div className={`${styles.hero_content} ${mounted ? styles.mounted : ''}`}>
 
@@ -62,7 +36,7 @@ export default function Home() {
                   <i className="bx bx-user bx-remove-padding"></i>
                 </div>
                 <h3>Nuestro Publico</h3>
-                <p>Jóvenes interesados en la música y interesados a explorar nuevos generos</p>
+                <p>Jóvenes interesados en la música y a explorar nuevos generos</p>
               </div>
 
               <div className={styles.function_card}>
@@ -70,8 +44,7 @@ export default function Home() {
                   <i className="bx bx-search bx-remove-padding" />
                 </div>
                 <h3>Qué nos hace especial</h3>
-                <p>Mientras otras plataformas te hacen navegar por algoritmos y menús confusos, tenemos directamente sin buscar por minutos para encontrar lo que
-quieres</p>
+                <p>Otras plataformas te hacen navegar por menús confusos, aquí tenemos todo sin buscar por minutos para encontrarlo</p>
               </div>
 
               <div className={styles.function_card}>
@@ -83,16 +56,46 @@ quieres</p>
               </div>
             </div>
 
+            <div className={styles.social_section}>
+              <a href="https://www.facebook.com"
+                target="_blank" rel="noopener noreferrer" className={styles.social_link} aria-label="Facebook" >
+                <i style={{ color: '#1e85ff' }} className="bxl bx-facebook-circle bx-remove-padding"></i>
+                <span>Facebook</span>
+              </a>
+              <a href="https://www.tiktok.com"
+                target="_blank" rel="noopener noreferrer" className={styles.social_link} aria-label="TikTok" >
+                <i style={{ color: '#fff' }} className="bxl bx-tiktok bx-remove-padding"></i>
+                <span>TikTok</span>
+              </a>
+              <a href="https://www.instagram.com"
+                target="_blank" rel="noopener noreferrer" className={styles.social_link} aria-label="Instagram" >
+                <i style={{ color: '#e1306c' }} className="bxl bx-instagram bx-remove-padding"></i>
+                <span>Instagram</span>
+              </a>
+
+              <a href="https://www.twitter.com"
+                target="_blank" rel="noopener noreferrer" className={styles.social_link} aria-label="Twitter" >
+                <i style={{ color: '#000' }} className="bxl bx-twitter-x bx-remove-padding"></i>
+                <span>Twitter</span>
+              </a>
+
+              <a href="https://www.youtube.com"
+                target="_blank" rel="noopener noreferrer" className={styles.social_link} aria-label="YouTube" >
+                <i style={{ color: '#ff0000' }} className="bxl bx-youtube bx-remove-padding"></i>
+                <span>YouTube</span>
+              </a>
+            </div>
+
             <div className={styles.stats_container}>
               <div className={styles.stat_item}>
-                <div className={styles.stat_number}>1000+</div>
+                <div className={styles.stat_number}>+1000</div>
                 <div className={styles.stat_label}>Artistas</div>
               </div>
 
               <div className={styles.stat_divider}></div>
 
               <div className={styles.stat_item}>
-                <div className={styles.stat_number}>500+</div>
+                <div className={styles.stat_number}>+500</div>
                 <div className={styles.stat_label}>Noticias</div>
               </div>
 
@@ -100,12 +103,11 @@ quieres</p>
 
               <div className={styles.stat_item}>
                 <div className={styles.stat_number}>24/7</div>
-                <div className={styles.stat_label}>Actualizaciones</div>
+                <div className={styles.stat_label}>Servicio</div>
               </div>
             </div>
-          </div>
 
-        </div>
+          </div>
       </main>
       <Footer />
     </>

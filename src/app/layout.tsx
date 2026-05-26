@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/Navbar";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -18,23 +17,17 @@ const openSans = Open_Sans({
   display: "swap",
 });
 
-const inversionz = localFont({
-  src: "../fonts/Inversionz.ttf",
-  variable: "--font-inversionz",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://audionauta.vercel.app/'),
   title: {
-    template: '%s | Music Discovery',
-    default: 'Music Discovery',
+    template: '%s | Audionauta',
+    default: 'Audionauta - Music Discovery',
   },
   description: 'Discover new artists, albums, and music news. Your ultimate platform for exploring the music world.',
   keywords: ['music', 'discovery', 'artists', 'albums', 'news', 'reviews'],
   authors: [{ name: 'Music Discovery Team' }],
-  creator: 'Music Discovery',
-  publisher: 'Music Discovery',
+  creator: 'Joseph M.',
+  publisher: 'Joseph M.',
   formatDetection: {
     email: false,
     address: false,
@@ -43,9 +36,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://music-discovery.com',
-    siteName: 'Music Discovery',
-    title: 'Music Discovery',
+    url: 'https://audionauta.vercel.app/',
+    siteName: 'Audionauta',
+    title: 'Audionauta - Music Discovery',
     description: 'Discover new artists, albums, and music news.',
     images: [
       {
@@ -58,7 +51,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Music Discovery',
+    title: 'Audionauta - Music Discovery',
     description: 'Discover new artists, albums, and music news.',
     images: ['/og-image.jpg'],
   },
@@ -84,7 +77,7 @@ export default function RootLayout({
         <link href="https://cdn.boxicons.com/3.0.8/fonts/brands/boxicons-brands.min.css" rel="stylesheet" />
         <link rel="preload" as="image" href="/icon.png" />
       </head>
-      <body className={`${openSans.variable} ${inversionz.variable}`}>
+      <body className={`${openSans.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

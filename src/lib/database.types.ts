@@ -54,6 +54,7 @@ export interface Song {
 
 export interface News {
     id: number
+    artist_id: number | null
     title: string
     excerpt: string | null
     content: string | null

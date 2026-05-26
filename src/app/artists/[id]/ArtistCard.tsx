@@ -14,6 +14,21 @@ const genreColors = [
     '#f59e0b',
     '#ec4899',
     '#14b8a6',
+    '#2f9e44',
+    '#1c7ed6',
+    '#f783ac',
+    '#fd7e14',
+    '#e64980',
+    '#748ffc',
+    '#12b886',
+    '#ff8787',
+    '#63e6be',
+    '#faa307',
+    '#845ef7',
+    '#ffb703',
+    '#3b5bdb',
+    '#20c997',
+    '#d9480f',
 ]
 
 function getGenreColor(genre: string): string {
@@ -100,13 +115,13 @@ export function ArtistCard({ id, name, genre, image, isWide, showFireEffect, onC
 
                 {isWide && (
                     <span className={styles.tag_group}>
-                        <i className='bx bx-group bx-remove-padding'></i>Banda
+                        <i className='bx bx-group bx-remove-padding'></i>
                     </span>
                 )}
             </div>
 
             <div className={styles.content}>
-                <Link href={`/artists/${id}`} className={styles.artist_link} onClick={onClick} aria-label={`View ${name} profile`}>
+                <Link href={`/artists/${id}`} onClick={onClick} aria-label={`View ${name} profile`}>
                     <div className={styles.name_container}>
                         <h3 className={styles.artist_name}>
                             {name}

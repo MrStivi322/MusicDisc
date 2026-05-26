@@ -9,16 +9,13 @@ import { useSpotify } from "@/contexts/SpotifyContext"
 import { useNotification } from "@/contexts/NotificationContext"
 import Image from "next/image"
 import styles from "@/styles/settings/Settings.module.css"
-import "@/app/globals.css"
 import Cropper from 'react-easy-crop'
 import type { Point, Area } from 'react-easy-crop'
 import cropperStyles from '@/styles/settings/ImageCropper.module.css'
-import { useCallback } from "react"
 import { validate, profileUpdateSchema, passwordChangeSchema, calculatePasswordStrength } from "@/lib/validation"
 import { rateLimiter, RATE_LIMITS } from "@/lib/rateLimiter"
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { SectionHeader } from '@/components/ui/SectionHeader'
 
 interface ImageCropperProps {
     imageSrc: string
@@ -306,6 +303,36 @@ export default function SettingsPage() {
         setSelectedImage(null)
     }
 
+    const handleDeleteAvatar = async () => {
+        if (!user || !formData.avatarUrl) return
+
+        try {
+            setUploading(true)
+            setError("")
+
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ avatar_url: null })
+                .eq('id', user.id)
+
+            if (updateError) throw updateError
+
+            const pathParts = formData.avatarUrl.split('avatars/')
+            if (pathParts.length > 1) {
+                const filePath = pathParts[1].split('?')[0]
+                await supabase.storage.from('avatars').remove([filePath])
+            }
+
+            setFormData(prev => ({ ...prev, avatarUrl: "" }))
+            setSuccess("Avatar eliminado")
+            router.refresh()
+        } catch (error: any) {
+            setError(error.message)
+        } finally {
+            setUploading(false)
+        }
+    }
+
     const uploadAvatar = async (imageBlob: Blob) => {
         try {
             setUploading(true)
@@ -494,18 +521,16 @@ export default function SettingsPage() {
             )}
 
             <div className="page-container">
-                <SectionHeader title="Configuración"/>
 
                 <div className={styles.settings_grid}>
-
 
                     {/* Appearance Section */}
                     <div className={styles.card}>
                         <div className={styles.card_body}>
-                            <div className={styles.section_header}>
-                                <i className={`bx bx-contrast bx-remove-padding ${styles.section_icon}`}></i>
+                            <div className={styles.card_header}>
+                                <i className={`bx bx-brightness-half bx-remove-padding ${styles.card_icon}`}></i>
                                 <div>
-                                    <h2 className={styles.section_title}>Apariencia</h2>
+                                    <h2 className={styles.card_title}>Apariencia</h2>
                                 </div>
                             </div>
 
@@ -515,11 +540,8 @@ export default function SettingsPage() {
                                     { id: 'dark', label: 'Oscuro' },
                                     { id: 'system', label: 'del Sistema' }
                                 ] as const).map((option) => (
-                                    <button
-                                        key={option.id}
-                                        onClick={() => handleThemeChange(option.id)}
-                                        className={`${styles.theme_card} ${theme === option.id ? styles.theme_card_active : ''}`}
-                                    >
+                                    <button key={option.id} onClick={() => handleThemeChange(option.id)}
+                                        className={`${styles.theme_card} ${theme === option.id ? styles.theme_card_active : ''}`}>
                                         <i className={`bx ${option.id === 'light' ? 'bx-brightness bx-remove-padding' :
                                             option.id === 'dark' ? 'bx-moon-star bx-remove-padding' : 'bx-desktop bx-remove-padding'
                                             } ${styles.theme_icon}`}></i>
@@ -538,10 +560,10 @@ export default function SettingsPage() {
                             {/* Profile Section */}
                             <div className={styles.card}>
                                 <div className={styles.card_body}>
-                                    <div className={styles.section_header}>
-                                        <i className={`bx bx-user bx-remove-padding ${styles.section_icon}`}></i>
-                                        <div>
-                                            <h2 className={styles.section_title}>Perfil</h2>
+                                    <div className={styles.card_header}>
+                                        <i className={`bx bx-user-id-card bx-remove-padding ${styles.card_icon}`}></i>
+                                        <div className={styles.card_title}>
+                                            <h2 className={styles.card_title}>Perfil</h2>
                                         </div>
                                     </div>
 
@@ -549,46 +571,52 @@ export default function SettingsPage() {
                                         <div className={styles.avatar_section}>
                                             <div className={styles.avatar_wrapper}>
                                                 {formData.avatarUrl ? (
-                                                    <Image
-                                                        src={formData.avatarUrl}
-                                                        alt="Avatar"
-                                                        className={styles.avatar_image}
-                                                        width={120}
-                                                        height={120}
-                                                        style={{ objectFit: 'cover' }}
-                                                    />
+                                                    <Image src={formData.avatarUrl} alt="Avatar" className={styles.avatar_image} width={120} height={120}/>
                                                 ) : (
                                                     <div className={styles.avatar_placeholder}>
                                                         {formData.username?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
                                                     </div>
                                                 )}
-                                                <button
-                                                    className={styles.avatar_edit_btn}
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    disabled={uploading}
-                                                >
+                                                <button className={styles.avatar_edit_btn} onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                                                     <i className='bx bx-camera bx-remove-padding'></i>
                                                 </button>
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileSelect}
-                                                    className={styles.file_input}
-                                                />
+                                                {formData.avatarUrl && (
+                                                    <button className={styles.avatar_delete_btn} onClick={handleDeleteAvatar} disabled={uploading} title="Eliminar Avatar">
+                                                        <i className='bx bx-trash bx-remove-padding'></i>
+                                                    </button>
+                                                )}
+                                                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className={styles.file_input}/>
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.info_group}>
+                                            <div className={styles.group_header}>Sesión</div>
+
+                                            <div className={styles.info_display}>
+                                                <Button className={styles.logout_btn} onClick={async () => {await supabase.auth.signOut()
+                                                    router.push("/")
+                                                    router.refresh()}} variant="outline">
+                                                    Cerrar sesión
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.info_group}>
+                                            <div className={styles.group_header}>Spotify</div>
+
+                                            <div className={styles.info_display}>
+                                                <Button onClick={token ? logout : login} variant="outline" className={styles.spotify_btn}>
+                                                    {token ? "Desconectar" : "Conectar"}
+                                                </Button>
                                             </div>
                                         </div>
 
 
                                         <div className={styles.info_group}>
                                             <div className={styles.group_header}>
-                                                <h3>Información personal</h3>
+                                                Información personal
                                                 {!isEditingProfile && (
-                                                    <Button
-                                                        onClick={() => setIsEditingProfile(true)}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                    >
+                                                    <Button onClick={() => setIsEditingProfile(true)} variant="ghost" size="md">
                                                         Editar
                                                     </Button>
                                                 )}
@@ -597,39 +625,18 @@ export default function SettingsPage() {
                                             {isEditingProfile ? (
                                                 <form onSubmit={handleUpdateProfile} className={styles.form}>
                                                     <div className={styles.field}>
-                                                        <Input
-                                                            label="Nombre de Usuario"
-                                                            placeholder="Tu Usuario"
-                                                            type="text"
-                                                            value={formData.username}
-                                                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                                        />
+                                                        <Input label="Nombre de Usuario" placeholder="Tu Usuario" type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })}/>
                                                     </div>
 
                                                     <div className={styles.field}>
-                                                        <Input
-                                                            label="Correo"
-                                                            type="email"
-                                                            placeholder="Tu Correo"
-                                                            value={formData.email}
-                                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                        />
+                                                        <Input label="Correo" type="email" placeholder="Tu Correo" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}/>
                                                     </div>
 
                                                     <div className={styles.form_actions}>
-                                                        <Button
-                                                            type="button"
-                                                            onClick={() => setIsEditingProfile(false)}
-                                                            variant="outline"
-                                                        >
+                                                        <Button type="button" onClick={() => setIsEditingProfile(false)} variant="outline">
                                                             Cancelar
                                                         </Button>
-                                                        <Button
-                                                            type="submit"
-                                                            disabled={loading}
-                                                            variant="primary"
-                                                            isLoading={loading}
-                                                        >
+                                                        <Button type="submit" disabled={loading} variant="primary" isLoading={loading}>
                                                             Guardar
                                                         </Button>
                                                     </div>
@@ -650,13 +657,9 @@ export default function SettingsPage() {
 
                                         <div className={styles.info_group}>
                                             <div className={styles.group_header}>
-                                                <h3>Seguridad</h3>
+                                                Contraseña
                                                 {!isChangingPassword && (
-                                                    <Button
-                                                        onClick={() => setIsChangingPassword(true)}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                    >
+                                                    <Button onClick={() => setIsChangingPassword(true)} variant="ghost" size="md">
                                                         Editar
                                                     </Button>
                                                 )}
@@ -665,25 +668,11 @@ export default function SettingsPage() {
                                             {isChangingPassword ? (
                                                 <form onSubmit={handleChangePassword} className={styles.form} autoComplete="off">
                                                     <div className={styles.field}>
-                                                        <Input
-                                                            label="Contraseña Actual"
-                                                            type="password"
-                                                            value={passwordData.currentPassword}
-                                                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                                                            placeholder="••••••••"
-                                                            autoComplete="off"
-                                                        />
+                                                        <Input label="Contraseña Actual" type="password" value={passwordData.currentPassword} onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })} placeholder="••••••••" autoComplete="off"/>
                                                     </div>
 
                                                     <div className={styles.field}>
-                                                        <Input
-                                                            label="Nueva Contraseña"
-                                                            type="password"
-                                                            value={passwordData.newPassword}
-                                                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                                            placeholder="••••••••"
-                                                            autoComplete="off"
-                                                        />
+                                                        <Input label="Nueva Contraseña" type="password" value={passwordData.newPassword} onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })} placeholder="••••••••" autoComplete="off"/>
                                                         {passwordData.newPassword && (
                                                             <div className={styles.form_strength_meter}>
                                                                 {renderStrengthMeter(calculatePasswordStrength(passwordData.newPassword))}
@@ -692,33 +681,16 @@ export default function SettingsPage() {
                                                     </div>
 
                                                     <div className={styles.field}>
-                                                        <Input
-                                                            label="Confirmar Nueva Contraseña"
-                                                            type="password"
-                                                            value={passwordData.confirmPassword}
-                                                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                                            placeholder="••••••••"
-                                                            autoComplete="off"
-                                                        />
+                                                        <Input label="Confirmar Nueva Contraseña" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })} placeholder="••••••••" autoComplete="off"/>
                                                     </div>
 
                                                     <div className={styles.form_actions}>
-                                                        <Button
-                                                            type="button"
-                                                            onClick={() => {
+                                                        <Button type="button" onClick={() => {
                                                                 setIsChangingPassword(false)
-                                                                setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-                                                            }}
-                                                            variant="outline"
-                                                        >
+                                                                setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })}} variant="outline">
                                                             Cancelar
                                                         </Button>
-                                                        <Button
-                                                            type="submit"
-                                                            disabled={loading}
-                                                            variant="primary"
-                                                            isLoading={loading}
-                                                        >
+                                                        <Button type="submit" disabled={loading} variant="primary" isLoading={loading}>
                                                             Guardar
                                                         </Button>
                                                     </div>
@@ -742,65 +714,26 @@ export default function SettingsPage() {
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Account Stats Section */}
-                            <div className={styles.settings_section}>
-                                <div className={styles.card}>
-                                    <div className={styles.card_body}>
-                                        <div className={styles.section_header}>
-                                            <i className={`bx bx-file-detail bx-remove-padding ${styles.section_icon}`}></i>
-                                            <div>
-                                                <h2 className={styles.section_title}>Información de la Cuenta</h2>
+                                        <div className={styles.info_group}>
+                                            <div className={styles.group_header}>
+                                                Información de la Cuenta
                                             </div>
-                                        </div>
-
-                                        <div className={styles.info_display}>
-                                            <div className={styles.info_item}>
-                                                <div className={styles.info_label}>Creación de la Cuenta</div>
-                                                <div className={styles.info_value}>
-                                                    {new Date(user.created_at).toLocaleDateString()}
+                                            <div className={styles.info_display}>
+                                                <div className={styles.info_item}>
+                                                    <span className={styles.info_label}>Creación de la Cuenta</span>
+                                                    <span className={styles.info_value}>{new Date(user.created_at).toLocaleDateString()}</span>
                                                 </div>
-                                            </div>
 
-                                            <div className={styles.info_item}>
-                                                <div className={styles.info_label}>Ultimo inicio de sesión</div>
-                                                <div className={styles.info_value}>
-                                                    {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '-'}
+                                                <div className={styles.info_item}>
+                                                    <span className={styles.info_label}>Ultimo inicio de sesión</span>
+                                                    <span className={styles.info_value}>{user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '-'}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {/* Spotify Integration Section */}
-                                <div className={styles.card}>
-                                    <div className={styles.card_body}>
-                                        <div className={styles.section_header}>
-                                            <i className={`bxl bx-spotify bx-remove-padding ${styles.section_icon} ${styles.spotify_icon}`}></i>
-                                            <div>
-                                                <h2 className={styles.section_title}>Integración con Spotify</h2>
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.info_display}>
-                                            <div className={styles.info_item}>
-                                                <div className={styles.info_label}>
-                                                    {token ? "Conectado" : "No conectado"}
-                                                </div>
-                                            </div>
-                                            <Button
-                                                onClick={token ? logout : login}
-                                                variant={token ? "outline" : "primary"}
-                                                className={!token ? styles.spotify_button : ""}
-                                            >
-                                                {token ? "Desconectar" : "Conectar"}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            </div>  
                         </>
                     )}
                 </div>

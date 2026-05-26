@@ -1,0 +1,109 @@
+.wrapper {
+  margin-bottom: 1rem;
+}
+
+.toggle_btn {
+  display: none;
+}
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  background: var(--glass-background);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: max-height var(--transition-base), opacity var(--transition-base), padding var(--transition-base), border-width var(--transition-base), margin-bottom var(--transition-base);
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    background: var(--glass-background);
+    backdrop-filter: blur(var(--blur-md));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .toggle_btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--color-foreground);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-shadow: none;
+    margin-bottom: 0;
+  }
+
+  .toggle_btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .toggle_title_group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .toggle_title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-foreground);
+  }
+
+  .toggle_icon {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chevron {
+    font-size: 1.5rem;
+    color: var(--color-muted-foreground);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+  }
+
+  .chevron_rotate {
+    transform: rotate(180deg);
+    color: var(--color-primary);
+    opacity: 1;
+  }
+
+  .panel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding: 0;
+    margin-bottom: 0;
+    border-width: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel_open {
+    max-height: 1000px;
+    opacity: 1;
+    padding-top: 1rem;
+    border-width: 1px;
+  }
+}

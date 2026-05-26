@@ -7,6 +7,9 @@ import Image from 'next/image'
 import styles from '@/styles/forum/Forum.module.css'
 import { ForumService } from '@/services/ForumService'
 import { useAuth } from '@/components/AuthProvider'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { useNotification } from '@/contexts/NotificationContext'
 
 import type { ForumCategory } from '@/lib/database.types'
 
@@ -23,7 +26,7 @@ const MAX_VIDEO_SIZE = 20 * 1024 * 1024 // 20MB
 export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: CreateThreadFormProps) {
     const router = useRouter()
     const { user } = useAuth()
-
+    const { showNotification } = useNotification()
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
@@ -31,7 +34,6 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
     const [file, setFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -56,17 +58,16 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
         const isVideo = selectedFile.type.startsWith('video/')
 
         if (!isImage && !isVideo) {
-            setError("Tipo de archivo no permitido. Solo se permiten imágenes o videos.")
+            showNotification("Formato de archivo no permitido.", "error")
             return
         }
 
         const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE
         if (selectedFile.size > maxSize) {
-            setError(`El archivo supera el tamaño máximo permitido de ${isImage ? '5MB' : '20MB'}.`)
+            showNotification(`El archivo supera el máximo permitido ${isImage ? '5MB' : '20MB'}.`, "error")
             return
         }
 
-        setError(null)
         setFile(selectedFile)
         setPreviewUrl(URL.createObjectURL(selectedFile))
     }
@@ -81,13 +82,8 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!user) return
-        if (!title.trim() || !content.trim()) {
-            setError("El título y el contenido son campos requeridos.")
-            return
-        }
 
         setIsSubmitting(true)
-        setError(null)
 
         try {
             let mediaUrl = undefined
@@ -115,39 +111,34 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
                 console.error('Error properties:', Object.keys(err))
                 console.error('Error stringified:', JSON.stringify(err, null, 2))
             }
-            setError(err.message || err.details || "Ha ocurrido un error al intentar crear la discusión.")
+            showNotification(err.message || err.details || "Ha ocurrido un error.", "error")
         } finally {
             setIsSubmitting(false)
         }
     }
 
     if (!user) {
-        return <p className={styles.error_message}>Debes iniciar sesión para publicar en el foro.</p>
+        return (
+            <div className={styles.form_container}>
+                <p className="empty-text">Debes iniciar sesión para publicar.</p>
+            </div>
+        )
     }
 
     return (
         <form onSubmit={handleSubmit} className={styles.form_container}>
 
-
             <div className={styles.field_group}>
-                <label className={styles.label} htmlFor="title">Título de la discusión</label>
-                <input
-                    id="title"
-                    type="text"
-                    className={styles.input}
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Escribe un título claro y conciso"
-                    maxLength={150}
-                    required
-                />
+                <label className="input-label">Título del post</label>
+                <Input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Tres tristes tigres tragaban en un trigal..." maxLength={150} required/>
                 <div className={`${styles.char_counter} ${title.length > 135 ? styles.limit_near : ''}`}>
                     {title.length} / 150
                 </div>
             </div>
 
             <div className={styles.field_group}>
-                <label className={styles.label}>Categoría</label>
+                <label className="input-label">Categoría</label>
                 <div className={styles.category_grid}>
                     {categories.map(cat => (
                         <div
@@ -171,24 +162,16 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
             </div>
 
             <div className={styles.field_group}>
-                <label className={styles.label} htmlFor="content">Contenido</label>
-                <textarea
-                    id="content"
-                    className={styles.textarea}
-                    value={content}
-                    onChange={handleContentChange}
-                    onInput={handleTextareaInput}
-                    placeholder="¿De qué quieres hablar?"
-                    required
-                    rows={6}
-                />
+                <label className="input-label" htmlFor="content">Contenido</label>
+                <textarea id="content" className="form-control" value={content} onChange={handleContentChange}
+                    onInput={handleTextareaInput} placeholder="¿De qué quieres hablar?" required rows={6}/>
                 <div className={`${styles.char_counter} ${content.length > MAX_CHARS * 0.9 ? styles.limit_near : ''}`}>
                     {content.length} / {MAX_CHARS}
                 </div>
             </div>
 
             <div className={styles.field_group}>
-                <label className={styles.label}>Multimedia (opcional)</label>
+                <label className="input-label">Multimedia (opcional)</label>
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -202,7 +185,7 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
                         className={styles.file_upload_area}
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <i className='bx bx-folder-up-arrow bx-remove-padding' style={{ fontSize: '2rem', marginBottom: '0.5rem' }}></i>
+                        <i className='bx bx-folder-up-arrow bx-remove-padding'></i>
                         <p>Arrastra y suelta una imagen o video, o haz clic para buscar</p>
                     </div>
                 ) : (
@@ -225,25 +208,25 @@ export function CreateThreadFixedForm({ categories, onSuccess, onCancel }: Creat
                 )}
             </div>
 
-            {error && <div className={styles.error_message}>{error}</div>}
             <div className={styles.buttons_row}>
                 {onCancel && (
-                    <button
+                    <Button
                         type="button"
                         onClick={onCancel}
-                        className="btn btn-outline btn-md"
+                        variant="outline"
                         disabled={isSubmitting}
                     >
                         Cancelar
-                    </button>
+                    </Button>
                 )}
-                <button
+                <Button
                     type="submit"
-                    className="btn btn-primary btn-md"
+                    variant="primary"
                     disabled={isSubmitting}
+                    isLoading={isSubmitting}
                 >
-                    {isSubmitting ? "Publicando..." : "Publicar"}
-                </button>
+                    Publicar
+                </Button>
             </div>
         </form>
     )

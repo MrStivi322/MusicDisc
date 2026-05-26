@@ -37,6 +37,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
 }
 
-export default function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
-    return <ArtistDetailClient params={params} />
+export default function ArtistPage() {
+    return <ArtistDetailClient />
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-
+import styles from '@/styles/components/FilterBar.module.css';
 
 interface FilterBarProps {
     children: React.ReactNode;
@@ -11,23 +11,22 @@ interface FilterBarProps {
 export function FilterBar({ children, className = '' }: FilterBarProps) {
     const [isOpen, setIsOpen] = useState(false);
 
-
     return (
-        <div className={`filter-bar-wrapper ${className}`}>
-            <button
-                className="filter-bar-toggle"
-                onClick={() => setIsOpen(!isOpen)}
+        <div className={`${styles.wrapper} ${className}`}>
+            <button className={styles.toggle_btn} onClick={() => setIsOpen(!isOpen)}
                 aria-label="Filtros"
                 aria-expanded={isOpen}
-            >
-                <i className='bx bx-filter-alt bx-remove-padding'></i>
+                aria-controls="filter-bar-panel">
+                <i className='bx bx-filter bx-remove-padding'></i>
                 <span>Filtros</span>
                 <i className={`bx bx-chevron-${isOpen ? 'up' : 'down'} bx-remove-padding`}></i>
             </button>
 
-            <div className={`filter-bar ${isOpen ? 'filter-bar-open' : ''}`}>
+            <div id="filter-bar-panel"
+                className={`${styles.panel} ${isOpen ? styles.panel_open : ''}`}>
                 {children}
             </div>
         </div>
     );
 }
+

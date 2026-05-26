@@ -13,8 +13,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useAuth } from '@/components/AuthProvider'
+import { useNotification } from '@/contexts/NotificationContext'
 
-import { SectionHeader } from '@/components/ui/SectionHeader'
 import { FilterBar } from '@/components/ui/FilterBar'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -24,6 +24,7 @@ function ForumPageContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { user } = useAuth()
+    const { showNotification } = useNotification()
 
 
     const ITEMS_PER_PAGE = 10
@@ -117,7 +118,7 @@ function ForumPageContent() {
 
     const handleCreateClick = () => {
         if (!user) {
-            alert("Debes iniciar sesión para realizar esta acción.")
+            showNotification("Iniciar sesión primero.", "error")
             return
         }
         setIsCreateModalOpen(true)
@@ -138,7 +139,6 @@ function ForumPageContent() {
     return (
         <main className={styles.main}>
             <div className="page-container">
-                <SectionHeader title="Comunidad" subtitle="Comparte y discute con otros amantes de la música." className={mounted ? 'animate-fade-in' : ''} />
 
                 <FilterBar>
                     <div className="flex-grow-1">
@@ -197,30 +197,27 @@ function ForumPageContent() {
                     <>
                         <div className={styles.content_grid}>
                             <div className={styles.main_column}>
-                                <div className={styles.feed}>
-                                    {threads.map((thread, index) => (
-                                        <div
-                                            key={thread.id}
-                                            className={styles.animate_entrance}
-                                            style={{ animationDelay: `${Math.min(index, 20) * 0.05}s` }}
-                                        >
+                                {isEmpty ? (
+                                    <div className="empty-state">
+                                        <p className="empty-text">No se encontraron discusiones</p>
+                                        <p className="empty-desc">
+                                            No se encontraron discusiones que coincidan {selectedCategory ? ' en esta categoría' : ''}.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className={styles.feed}>
+                                        {threads.map((thread) => (
+                                            <div key={thread.id}>
                                             <ForumCard thread={thread} />
                                         </div>
                                     ))}
-                                </div>
+                                    </div>
+                                )}
                             </div>
 
                             <ForumSidebar />
                         </div>
 
-                        {isEmpty && (
-                            <div className="empty-state">
-                                <p className="empty-text">No se encontraron discusiones</p>
-                                <p className="empty-desc">
-                                    No hay discusiones en esta sección todavía{selectedCategory ? ' en esta categoría' : ''}.
-                                </p>
-                            </div>
-                        )}
 
                         {!isReachingEnd && !isEmpty && (
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
@@ -243,7 +240,6 @@ function ForumPageContent() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 title="Nueva discusión"
-                size="md"
             >
                 <CreateThreadFixedForm
                     categories={categories}
@@ -259,7 +255,7 @@ function ForumPageContent() {
 function ForumSidebar() {
     const language = 'es'
 
-    const [topNews, setTopNews] = useState<News[]>([])
+    const [topNews, setTopNews] = useState<any[]>([])
     const [upcomingReleases, setUpcomingReleases] = useState<UpcomingRelease[]>([])
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         news: true,
@@ -271,7 +267,7 @@ function ForumSidebar() {
             const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
             const { data: newsData } = await supabase
                 .from('news')
-                .select('*')
+                .select('*, artists(image_url)')
                 .gte('published_at', sevenDaysAgo)
                 .order('views_count', { ascending: false })
                 .limit(4)
@@ -304,37 +300,33 @@ function ForumSidebar() {
                     className={`${styles.sidebar_section_header} ${openSections.news ? styles.open : ''}`}
                     onClick={() => toggleSection('news')}
                 >
-                    <h3 className={styles.sidebar_section_title}>Últimas Noticias</h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className={styles.sidebar_section_title_group}>
                         <i className={`bx bx-newspaper bx-remove-padding ${styles.sidebar_section_icon}`}></i>
-                        <i className={`bx bx-chevron-down bx-remove-padding ${styles.dropdown_chevron} ${openSections.news ? styles.rotate : ''}`}></i>
+                        <h3 className={styles.sidebar_section_title}>Noticias</h3>
                     </div>
+                    <i className={`bx bx-chevron-down bx-remove-padding ${styles.dropdown_chevron} ${openSections.news ? styles.rotate : ''}`}></i>
                 </div>
                 <div className={`${styles.sidebar_section_content} ${openSections.news ? styles.open : ''}`}>
-                    {topNews.length > 0 ? (
-                        topNews.map((news) => (
-                            <Link href={`/news/${news.id}`} key={news.id} className={styles.news_item}>
-                                <div className={styles.news_image}>
-                                    {news.image_url ? (
+                    <div className={styles.sidebar_section_inner}>
+                        {topNews.length > 0 ? (
+                            topNews.map((news) => (
+                                <Link href={`/news/${news.id}`} key={news.id} className={styles.news_item}>
+                                    <div className={styles.news_image}>
                                         <Image
-                                            src={news.image_url}
+                                            src={news.artists.image_url}
                                             alt={news.title}
                                             fill
-                                            sizes="120px"
-                                            style={{ objectFit: 'cover' }}
-                                        />
-                                    ) : (
-                                        <div className={styles.news_placeholder}>Noticias</div>
-                                    )}
-                                </div>
-                                <div className={styles.news_content}>
-                                    <h4>{news.title}</h4>
-                                </div>
-                            </Link>
-                        ))
-                    ) : (
-                        <p className={styles.sidebar_empty_state}>No hay noticias disponibles.</p>
-                    )}
+                                            sizes="120px"/>
+                                    </div>
+                                    <div className={styles.news_content}>
+                                        {news.title}
+                                    </div>
+                                </Link>
+                            ))
+                        ) : (
+                            <p className={styles.sidebar_empty_state}>No hay noticias disponibles.</p>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -343,50 +335,47 @@ function ForumSidebar() {
                     className={`${styles.sidebar_section_header} ${openSections.releases ? styles.open : ''}`}
                     onClick={() => toggleSection('releases')}
                 >
-                    <h3 className={styles.sidebar_section_title}>Nuevos Lanzamientos</h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className={styles.sidebar_section_title_group}>
                         <i className={`bx bx-calendar-alt bx-remove-padding ${styles.sidebar_section_icon}`}></i>
-                        <i className={`bx bx-chevron-down bx-remove-padding ${styles.dropdown_chevron} ${openSections.releases ? styles.rotate : ''}`}></i>
+                        <h3 className={styles.sidebar_section_title}>Lanzamientos</h3>
                     </div>
+                    <i className={`bx bx-chevron-down bx-remove-padding ${styles.dropdown_chevron} ${openSections.releases ? styles.rotate : ''}`}></i>
                 </div>
                 <div className={`${styles.sidebar_section_content} ${openSections.releases ? styles.open : ''}`}>
-                    {upcomingReleases.length > 0 ? (
-                        upcomingReleases.map((release) => {
-                            const releaseDate = new Date(release.release_date)
-                            const month = releaseDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: 'short' })
-                            const day = releaseDate.getDate()
+                    <div className={styles.sidebar_section_inner}>
+                        {upcomingReleases.length > 0 ? (
+                            upcomingReleases.map((release) => {
+                                const releaseDate = new Date(release.release_date)
+                                const month = releaseDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: 'short' })
+                                const day = releaseDate.getDate()
 
-                            return (
-                                <div key={release.id} className={styles.release_item}>
-                                    <div className={styles.release_image}>
-                                        {release.artists?.image_url ? (
-                                            <Image
-                                                src={release.artists.image_url}
-                                                alt={release.artists.name}
-                                                fill
-                                                sizes="60px"
-                                                style={{ objectFit: 'cover' }}
-                                            />
-                                        ) : (
-                                            <div className={styles.release_placeholder}>
-                                                {release.artists?.name?.charAt(0) || '?'}
+                                return (
+                                    <div key={release.id} className={styles.release_item}>
+                                        {release.artists?.image_url && (
+                                            <div className={styles.release_image}>
+                                                <Image
+                                                    src={release.artists.image_url}
+                                                    alt={release.artists.name}
+                                                    fill
+                                                    sizes="60px"
+                                                />
                                             </div>
                                         )}
+                                        <div className={styles.release_info}>
+                                            <p className={styles.release_title}>{release.album_title}</p>
+                                            <p className={styles.release_artist}>{release.artists?.name || "Artista desconocido"}</p>
+                                        </div>
+                                        <div className={styles.release_date_badge}>
+                                            <span className={styles.release_month}>{month}</span>
+                                            <span className={styles.release_day}>{day}</span>
+                                        </div>
                                     </div>
-                                    <div className={styles.release_info}>
-                                        <p className={styles.release_title}>{release.album_title}</p>
-                                        <p className={styles.release_artist}>{release.artists?.name || "Artista desconocido"}</p>
-                                    </div>
-                                    <div className={styles.release_date_badge}>
-                                        <span className={styles.release_month}>{month}</span>
-                                        <span className={styles.release_day}>{day}</span>
-                                    </div>
-                                </div>
-                            )
-                        })
-                    ) : (
-                        <p className={styles.sidebar_empty_state}>No hay lanzamientos disponibles.</p>
-                    )}
+                                )
+                            })
+                        ) : (
+                            <p className={styles.sidebar_empty_state}>No hay lanzamientos disponibles.</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </aside>
@@ -395,7 +384,7 @@ function ForumSidebar() {
 
 export default function ForumPage() {
     return (
-        <Suspense fallback={<div className="flex-center" style={{ padding: '4rem 0' }}><p>Loading...</p></div>}>
+        <Suspense fallback={<div><p>Loading...</p></div>}>
             <ForumPageContent />
         </Suspense>
     )

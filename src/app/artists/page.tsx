@@ -9,7 +9,6 @@ import type { Artist } from "@/lib/database.types"
 import styles from "@/styles/Artists/Artists.module.css"
 
 import { useDebounce } from "@/hooks/useDebounce"
-import { SectionHeader } from '@/components/ui/SectionHeader'
 import { FilterBar } from '@/components/ui/FilterBar'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -133,7 +132,6 @@ function ArtistsContent() {
     return (
         <div className="page-container">
             <div className={mounted ? 'animate-fade-in' : ''}>
-                <SectionHeader title="Descubre nuevos artistas" />
 
                 <FilterBar>
                     <div className="flex-grow-1">
@@ -240,7 +238,7 @@ export default function ArtistsPage() {
 
     return (
         <main className={styles.main}>
-            <Suspense fallback={<div className="flex-center" style={{ padding: '4rem 0' }}><p>Cargando...</p></div>}>
+            <Suspense fallback={<div><p>Cargando...</p></div>}>
                 <ArtistsContent />
             </Suspense>
         </main>

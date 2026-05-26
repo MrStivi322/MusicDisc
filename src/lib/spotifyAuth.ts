@@ -1,5 +1,5 @@
 export const CLIENT_ID = 'ba9ae298f454444ea8dfb33e95847057';
-export const REDIRECT_URI = 'http://127.0.0.1:3000';
+export const REDIRECT_URI = 'https://audionauta.vercel.app/';
 export const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 export const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
 export const SCOPES = [
