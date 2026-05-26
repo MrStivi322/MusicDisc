@@ -313,7 +313,7 @@ function ForumSidebar() {
                                 <Link href={`/news/${news.id}`} key={news.id} className={styles.news_item}>
                                     <div className={styles.news_image}>
                                         <Image
-                                            src={news.artists.image_url}
+                                            src={news.artists?.image_url ?? '/fallback-image.png'}
                                             alt={news.title}
                                             fill
                                             sizes="120px"/>
